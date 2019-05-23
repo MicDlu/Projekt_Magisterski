@@ -19,24 +19,41 @@ DocAreaLSD::DocAreaLSD(cv::Mat src)
 	// scale extends
 	//ScaleExtends(lines_ext);
 
-	// Calc points
-	//std::vector<cv::Point2f> intersectionPoints;
-	for (int i = 0; i < lines_ext.size(); i++)
+	// Get ~90 angles intersections that fit in image
+	std::vector<cv::Point2f> intersectionPoints = GetIntersectionPoints(lines_ext);
+
+	//draw points
+	for (int i = 0; i < intersectionPoints.size(); i++)
 	{
-		LineExtender line1 = LineExtender(lines_ext[i]);
-		for (int j = i+1; j < lines_ext.size(); j++)
-		{
-			LineExtender line2 = LineExtender(lines_ext[j]);
-			cv::Point2f intersection = line1.GetIntersectionPoint(line2);
-			float angle = line1.GetIntersectionAngle(line2);
-			//if (angle > 70 && angle < 110)
-				//intersectionPoints.push_back(intersection);			
-				cv::circle(src, intersection, 3, cv::Scalar(0, 0, 0), 3);
-		}
+		cv::circle(src, intersectionPoints[i], 3, cv::Scalar(0, 1, 1), 2);
 	}
 
 	cv::imshow("test", src);
 	cv::waitKey(0);
+}
+
+std::vector<cv::Point2f> DocAreaLSD::GetIntersectionPoints(std::vector<cv::Vec4f> &lines_ext)
+{
+	std::vector<cv::Point2f> intersectionPoints;
+	for (int i = 0; i < lines_ext.size(); i++)
+	{
+		LineExtender line1 = LineExtender(lines_ext[i]);
+		for (int j = i + 1; j < lines_ext.size(); j++)
+		{
+			LineExtender line2 = LineExtender(lines_ext[j]);
+			cv::Point2f intersection = line1.GetIntersectionPoint(line2);
+
+			if (line1.FitsInImage(intersection.x, imageOriginal.size()))
+			{
+				float angle = line1.GetIntersectionAngle(line2);
+				if (angle >(90 - intersectionDegTolerance) && angle < 90 + (intersectionDegTolerance))
+				{
+					intersectionPoints.push_back(intersection);
+				}
+			}
+		}
+	}
+	return intersectionPoints;
 }
 
 void DocAreaLSD::ScaleExtends(std::vector<cv::Vec4f> &lines_ext)

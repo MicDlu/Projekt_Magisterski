@@ -68,11 +68,21 @@ cv::Vec4f LineExtender::GetLineExtends(cv::Size imageSize)
 float LineExtender::GetIntersectionAngle(LineExtender line)
 {
 	float tgA = abs((a - line.a) / (1 + a * line.a));
-	return atan(tgA);
+	float radianA = atan(tgA);
+	return radianA * rad2deg;
 }
 
 cv::Point2f LineExtender::GetIntersectionPoint(LineExtender line)
 {
 	float x = (b - line.b) / (line.a - a);
 	return cv::Point2f(x, CalcY(x));
+}
+
+bool LineExtender::FitsInImage(float x, cv::Size imageSize)
+{
+	if (x < 0 || x > imageSize.width)
+		return false;
+	if (CalcY(x) < 0 || CalcY(x) > imageSize.height)
+		return false;
+	return true;
 }

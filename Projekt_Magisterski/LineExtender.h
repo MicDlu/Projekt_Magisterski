@@ -9,10 +9,12 @@ public:
 	cv::Vec4f GetLineExtends(cv::Size imageSize);
 	float GetIntersectionAngle(LineExtender line);
 	cv::Point2f GetIntersectionPoint(LineExtender line);
+	bool FitsInImage(float x, cv::Size imageSize);
 private:
 	float a, b;
 	cv::Point2f extend1, extend2;
 	cv::Mat image;
+	const float rad2deg = 180 / 3.141592653589793238463;
 	float CalcY(float x);
 	float CalcX(float y);
 	void CalcBounds(cv::Size & imageSize);
