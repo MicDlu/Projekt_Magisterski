@@ -2,15 +2,18 @@
 using namespace cv;
 using namespace std;
 
-float a, b;
-cv::Point2f extend1, extend2;
-cv::Mat image;
+LineExtender::LineExtender(cv::Vec4f linesVector)
+{
+	cv::Point2f point1 = cv::Point2f(linesVector[0], linesVector[1]);
+	cv::Point2f point2 = cv::Point2f(linesVector[2], linesVector[3]);
+	a = (point2.y - point1.y) / (point2.x - point1.x);
+	b = point1.y - a * point1.x;
+}
 
-LineExtender::LineExtender(cv::Point2f point1, cv::Point2f point2, cv::Size imageSize)
+LineExtender::LineExtender(cv::Point2f point1, cv::Point2f point2)
 {
 	a = (point2.y - point1.y) / (point2.x - point1.x);
 	b = point1.y - a * point1.x;
-	CalcBounds(imageSize);
 }
 
 LineExtender::~LineExtender()
@@ -56,7 +59,20 @@ void LineExtender::CalcBounds(cv::Size &imageSize)
 	extend2 = cv::Point2f(extendX2, CalcY(extendX2));
 }
 
-cv::Vec4f LineExtender::GetLineExtends()
+cv::Vec4f LineExtender::GetLineExtends(cv::Size imageSize)
 {
+	CalcBounds(imageSize);
 	return cv::Vec4f(extend1.x, extend1.y, extend2.x, extend2.y);
+}
+
+float LineExtender::GetIntersectionAngle(LineExtender line)
+{
+	float tgA = abs((a - line.a) / (1 + a * line.a));
+	return atan(tgA);
+}
+
+cv::Point2f LineExtender::GetIntersectionPoint(LineExtender line)
+{
+	float x = (b - line.b) / (line.a - a);
+	return cv::Point2f(x, CalcY(x));
 }

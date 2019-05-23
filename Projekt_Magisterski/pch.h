@@ -12,6 +12,7 @@
 // TODO: add headers that you want to pre-compile here
 
 #include <iostream>
+#include <math.h>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>
