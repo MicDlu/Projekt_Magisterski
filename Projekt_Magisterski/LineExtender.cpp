@@ -78,11 +78,16 @@ cv::Point2f LineExtender::GetIntersectionPoint(LineExtender line)
 	return cv::Point2f(x, CalcY(x));
 }
 
-bool LineExtender::FitsInImage(float x, cv::Size imageSize)
+bool LineExtender::FitsInImage(cv::Point2f point, cv::Size imageSize)
 {
-	if (x < 0 || x > imageSize.width)
+	if (point.x < 0 || point.x > imageSize.width)
 		return false;
-	if (CalcY(x) < 0 || CalcY(x) > imageSize.height)
+	if (point.y < 0 || point.y > imageSize.height)
 		return false;
 	return true;
+}
+
+float LineExtender::GetOxAngle()
+{
+	return atan(a) * rad2deg;
 }

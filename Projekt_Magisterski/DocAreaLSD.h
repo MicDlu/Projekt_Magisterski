@@ -7,11 +7,16 @@ public:
 private:
 	cv::Mat imageOriginal;
 	cv::Ptr<cv::LineSegmentDetector> lsd;
-	const int intersectionDegTolerance = 20;
-	void ScaleExtends(std::vector<cv::Vec4f> &lines_ext);
+	const int intersectionDegTolerance = 15;
+	const int lineDegTolerance = 15;
+	const cv::Size lsdImageSize = cv::Size(300, 300);
+	std::vector<cv::Vec4f> ScaleExtends(std::vector<cv::Vec4f> &lines_ext);
+	cv::Mat PreprocessLSD(cv::Mat inputImage);
 	std::vector<cv::Vec4f> GetExtendedLSD(cv::Mat imageLSD);
-	cv::Mat PreprocessLSD();
+	std::vector<cv::Point2f>* GetQuadliteralPoints(std::vector<cv::Point2f> &intersectionPoints);
 	std::vector<cv::Point2f> GetIntersectionPoints(std::vector<cv::Vec4f> &lines_ext);
 };
 
 	void LineFeaturesTutorial(cv::String file);
+
+	cv::Point2f GetMedianPoint(std::vector<cv::Point2f> scores);

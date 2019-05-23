@@ -9,7 +9,8 @@ public:
 	cv::Vec4f GetLineExtends(cv::Size imageSize);
 	float GetIntersectionAngle(LineExtender line);
 	cv::Point2f GetIntersectionPoint(LineExtender line);
-	bool FitsInImage(float x, cv::Size imageSize);
+	bool FitsInImage(cv::Point2f point, cv::Size imageSize);
+	float GetOxAngle();
 private:
 	float a, b;
 	cv::Point2f extend1, extend2;
