@@ -3,18 +3,30 @@
 
 DocAreaLSD::DocAreaLSD(cv::Mat src)
 {
-	lsd = cv::createLineSegmentDetector();
-
+	// Pass variable
 	imageOriginal = src;
 
-	// LSD resized image
-	cv::Mat imageResized = imageOriginal;
-	//cv::Size resizeSize = cv::Size(100, 100);
-	//cv::resize(src, imageResized, resizeSize);
-	std::vector<cv::Vec4f> lines_ext = GetLSD(imageResized);
-	//lsd->drawSegments(imageResized, lines_ext);
+	// Init LSD
+	lsd = cv::createLineSegmentDetector();
+
+	// Preprocess for LSD
+	cv::Mat imagePre = PreprocessLSD();
+
+	// Extended LSD
+	std::vector<cv::Vec4f> lines_ext = GetExtendedLSD(imagePre);
+	lsd->drawSegments(src, lines_ext);
 
 	// scale extends
+	//ScaleExtends(lines_ext);
+
+	cv::imshow("test", src);
+	cv::waitKey(0);
+}
+
+void DocAreaLSD::ScaleExtends(std::vector<cv::Vec4f> &lines_ext)
+{
+	cv::Mat imageResized;
+	cv::resize(imageOriginal, imageResized, cv::Size(100, 100));
 	std::vector<cv::Vec4f> lines_original;
 	float factor[2];
 	factor[0] = imageOriginal.size().width / imageResized.size().width;
@@ -29,12 +41,16 @@ DocAreaLSD::DocAreaLSD(cv::Mat src)
 		vecOut[3] = vecIn[3] * factor[1];
 		lines_original.push_back(vecOut);
 	}
+	lsd->drawSegments(imageResized, lines_original);
+}
 
-	lsd->drawSegments(src, lines_original);
-	cv::imshow("test", src);
-	cv::waitKey(0);
-	//lsd
-	//bound
+cv::Mat DocAreaLSD::PreprocessLSD()
+{
+	cv::Mat imageProcess = ThresholdImage(imageOriginal);
+	// erode + dilate
+	cv::InputArray kernel = cv::Mat::ones(cv::Size(5, 5), CV_8U);
+	cv::morphologyEx(imageProcess, imageProcess, cv::MORPH_CLOSE, kernel);
+	return imageProcess;
 }
 
 
@@ -42,41 +58,7 @@ DocAreaLSD::~DocAreaLSD()
 {
 }
 
-
-void LineFeaturesTutorial(cv::String file)
-{
-	cv::Mat src = cv::imread(file, cv::IMREAD_GRAYSCALE);
-	cv::resize(src, src, cv::Size(60, 80));
-	std::cout << "--------------------------------\n";
-
-	cv::Mat blank = cv::Mat::zeros(src.size(), CV_8UC1);
-
-	/* create a pointer to an LSDDetector object */
-	cv::Ptr<cv::LineSegmentDetector> lsd = cv::createLineSegmentDetector();
-	std::vector<cv::Vec4f> lines_std;
-
-	// Detect the lines
-	lsd->detect(src, lines_std);
-
-	std::vector<cv::Vec4f> lines_ext;
-	cv::Mat drawnLines(src);
-	for (int i = 0; i < lines_std.size(); i++)
-	{
-		// Show found lines
-		cv::Vec4f vec = cv::Vec4f(lines_std[i].val);
-		cv::Point2f p1 = cv::Point2f(vec[0], vec[1]);
-		cv::Point2f p2 = cv::Point2f(vec[2], vec[3]);
-		LineExtender lineExtend(p1, p2, drawnLines.size());
-		cv::Vec4f ext = lineExtend.GetLineExtends();
-		lines_ext.push_back(ext);
-	}
-
-	lsd->drawSegments(drawnLines, lines_ext);
-	cv::imshow("LineExtended", drawnLines);
-	cv::waitKey(0);
-}
-
-std::vector<cv::Vec4f> DocAreaLSD::GetLSD(cv::Mat imageLSD)
+std::vector<cv::Vec4f> DocAreaLSD::GetExtendedLSD(cv::Mat imageLSD)
 {
 	/* create a pointer to an LSDDetector object */
 	std::vector<cv::Vec4f> lines_std;

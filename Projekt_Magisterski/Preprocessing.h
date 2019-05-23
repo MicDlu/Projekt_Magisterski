@@ -2,7 +2,7 @@
 
 cv::Mat LoadImage();
 
-cv::Mat ResizeImage(cv::Mat input);
+cv::Mat FixImageSize(cv::Mat input);
 
 cv::Mat ThresholdImage(cv::Mat input);
 

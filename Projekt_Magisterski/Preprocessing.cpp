@@ -7,7 +7,7 @@ cv::Mat LoadImage()
 	return cv::imread(directoryPath + fileName);
 }
 
-cv::Mat ResizeImage(cv::Mat input)
+cv::Mat FixImageSize(cv::Mat input)
 {
 	cv::Mat output;
 	cv::Size resizeSize = cv::Size(800, 600);
