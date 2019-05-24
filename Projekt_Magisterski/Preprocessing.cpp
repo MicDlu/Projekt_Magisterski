@@ -1,12 +1,5 @@
 #include "pch.h"
 
-cv::Mat LoadImage()
-{
-	cv::String directoryPath = "C:/Users/micha/source/Repos/Projekt_Magisterski/Projekt_Magisterski/Images/";
-	cv::String fileName = "IMG_20190228_200009.jpg";
-	return cv::imread(directoryPath + fileName);
-}
-
 cv::Mat FixImageSize(cv::Mat input)
 {
 	cv::Mat output;
@@ -31,7 +24,6 @@ std::vector<cv::String> GetFiles()
 	files.push_back(directory + "IMG_20190228_195957.jpg");
 	files.push_back(directory + "IMG_20190228_200009.jpg");
 	files.push_back(directory + "IMG_20190228_200028.jpg");
-	files.push_back(directory + "IMG_20190228_200046.jpg");
 	files.push_back(directory + "IMG_20190228_200050.jpg");
 	files.push_back(directory + "IMG_20190228_200058.jpg");
 	return files;

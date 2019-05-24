@@ -25,23 +25,24 @@ DocAreaLSD::DocAreaLSD(cv::Mat src)
 	// Get ~90 angles intersections that fit in image
 	std::vector<cv::Point2f> intersectionPoints = GetIntersectionPoints(lines_ext);
 
-	//draw points
-	for (int i = 0; i < intersectionPoints.size(); i++)
-	{
-		//cv::circle(src, intersectionPoints[i], 1, cv::Scalar(0, 1, 1), 2);
-	}
-
-	// split image
+	// Calc quadliterals
 	std::vector<cv::Point2f>* quadPoints = GetQuadliteralPoints(intersectionPoints);
 
-	cv::circle(src, GetMedianPoint(quadPoints[0]), 5, cv::Scalar(0, 0, 0), 5);
-	cv::circle(src, GetMedianPoint(quadPoints[1]), 5, cv::Scalar(0, 0, 0), 5);
-	cv::circle(src, GetMedianPoint(quadPoints[2]), 5, cv::Scalar(0, 0, 0), 5);
-	cv::circle(src, GetMedianPoint(quadPoints[3]), 5, cv::Scalar(0, 0, 0), 5);
+	for (int q = 0; q < 4; q++)
+	{
+		quadliterals.push_back(GetMedianPoint(quadPoints[q]));
 
+		// Draw intersection points
+		//for (int i = 0; i < quadPoints[q].size(); i++)
+		//{
+		//	cv::circle(src, quadPoints[q][i], 1, cv::Scalar(0, 255, 0), 2);
+		//}
+		// Draw quad point
+		//cv::circle(src, quadliterals[q], 5, cv::Scalar(255, 0, 255), 5);
+	}
 
-	cv::imshow("test", src);
-	cv::waitKey(0);
+	//cv::imshow("test", src);
+	//cv::waitKey(0);
 }
 
 std::vector<cv::Point2f>* DocAreaLSD::GetQuadliteralPoints(std::vector<cv::Point2f> &intersectionPoints)
@@ -54,6 +55,9 @@ std::vector<cv::Point2f>* DocAreaLSD::GetQuadliteralPoints(std::vector<cv::Point
 	quadliterals[3] = cv::Rect(cv::Point(size.width / 2, size.height / 2), cv::Size(size.width / 2, size.height / 2));
 
 	static std::vector<cv::Point2f> quadPoints[4];
+	for (int i = 0; i < 4; i++)
+		quadPoints[i].clear();
+
 	for (int i = 0; i < intersectionPoints.size(); i++)
 	{
 		for (int q = 0; q < 4; q++)
@@ -123,6 +127,11 @@ cv::Mat DocAreaLSD::PreprocessLSD(cv::Mat inputImage)
 
 DocAreaLSD::~DocAreaLSD()
 {
+}
+
+std::vector<cv::Point2f> DocAreaLSD::GetQuadPoints()
+{
+	return quadliterals;
 }
 
 std::vector<cv::Vec4f> DocAreaLSD::GetExtendedLSD(cv::Mat imageLSD)

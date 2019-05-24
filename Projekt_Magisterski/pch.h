@@ -13,6 +13,7 @@
 
 #include <iostream>
 #include <math.h>
+#include <windows.h>
 #include <opencv2/core.hpp>
 #include <opencv2/highgui.hpp>
 #include <opencv2/imgproc.hpp>

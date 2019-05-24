@@ -11,7 +11,13 @@ int main()
 	{
 		cv::Mat imageInput = cv::imread(files[i],cv::COLORMAP_HSV);
 		cv::Mat imageFixSize = FixImageSize(imageInput);
-		DocAreaLSD::DocAreaLSD(imageFixSize);
+		DocAreaLSD docAreaLSD(imageFixSize);
+		std::vector<cv::Point2f> quads = docAreaLSD.GetQuadPoints();
+		for (int q = 0; q < 4; q++)		
+			cv::circle(imageFixSize, quads[q], 10, cv::Scalar(150, 150, 0), 5);
+
+		cv::imshow("test", imageFixSize);
+		cv::waitKey(0);
 	}
 	
 	return 0;
