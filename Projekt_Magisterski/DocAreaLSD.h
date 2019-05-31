@@ -4,14 +4,14 @@ class DocAreaLSD
 public:
 	DocAreaLSD(cv::Mat src);
 	~DocAreaLSD();
-	std::vector<cv::Point2f> GetQuadPoints();
+	std::vector<cv::Point> GetQuadPoints();
 private:
 	cv::Mat imageOriginal;
 	cv::Ptr<cv::LineSegmentDetector> lsd;
 	const int intersectionDegTolerance = 15;
 	const int lineDegTolerance = 15;
 	const cv::Size lsdImageSize = cv::Size(300, 300);
-	std::vector<cv::Point2f> quadliterals;
+	std::vector<cv::Point> quadliterals;
 	//
 	std::vector<cv::Vec4f> ScaleExtends(std::vector<cv::Vec4f> &lines_ext);
 	cv::Mat PreprocessLSD(cv::Mat inputImage);
