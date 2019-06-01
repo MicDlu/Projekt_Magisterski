@@ -23,5 +23,6 @@
 #include "Preprocessing.h"
 #include "LineExtender.h"
 #include "DocAreaLSD.h"
+#include "OtsuN.h"
 
 #endif //PCH_H

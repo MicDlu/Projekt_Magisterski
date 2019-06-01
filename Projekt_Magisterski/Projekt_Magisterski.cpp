@@ -12,12 +12,15 @@ int main()
 	{
 		cv::Mat imageInput = cv::imread(files[i]);
 		cv::Mat imageFixSize = FixImageSize(imageInput);
+
 		DocAreaLSD docAreaLSD(imageFixSize);
 		std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
+		// DRAW  EDGE POINTS
 		//for (int q = 0; q < 4; q++)
 		//	cv::circle(imageFixSize, quads[q], 10, cv::Scalar(150, 150, 0), 5);
 		//cv::imshow("test", imageFixSize);
 		//cv::waitKey(0);
+
 		cv::Mat imageMask = cv::Mat::zeros(imageFixSize.size(), CV_8UC3);
 		cv::fillConvexPoly(imageMask, quads, cv::Scalar(255, 255, 255));
 
@@ -41,10 +44,9 @@ int main()
 		cv::warpPerspective(imageMasked, imageWarped, transform, imageFixSize.size());
 
 
-		//cv::imshow("test", imageWarped);
-		//cv::waitKey(0);
-		Otsu3(imageWarped);
-		//OtsuN(imageWarped,2);
+		OtsuN otsu(imageWarped, 4);
+		otsu.ShowLevels(imageWarped);
+		otsu.ReturnThresholds();
 		continue;
 	}
 	

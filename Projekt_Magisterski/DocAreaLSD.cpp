@@ -42,7 +42,7 @@ DocAreaLSD::DocAreaLSD(cv::Mat src)
 			//cv::circle(src, quadPoints[q][i], 1, cv::Scalar(0, 255, 0), 2);
 		}
 		// Draw quad point
-		cv::circle(src, quadliterals[q], 5, cv::Scalar(255, 0, 255), 5);
+		//cv::circle(src, quadliterals[q], 5, cv::Scalar(255, 0, 255), 5);
 	}
 
 	//cv::imshow("test", src);
