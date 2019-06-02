@@ -12,6 +12,14 @@ int main()
 	{
 		cv::Mat imageInput = cv::imread(files[i]);
 		cv::Mat imageFixSize = FixImageSize(imageInput);
+		cv::Mat imageExtract = RemoveBackground(imageFixSize);
+		imageExtract = ReduceVariety(imageExtract);
+		OtsuN otsu(imageExtract, 3);
+		otsu.ShowLevels();
+		otsu.ReturnLevelImage(0);
+		otsu.ReturnLevelImage(1);
+		otsu.ReturnLevelImage(2);
+		continue;
 
 		DocAreaLSD docAreaLSD(imageFixSize);
 		std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
@@ -43,11 +51,10 @@ int main()
 		cv::Mat imageWarped;
 		cv::warpPerspective(imageMasked, imageWarped, transform, imageFixSize.size());
 
-
-		OtsuN otsu(imageWarped, 4);
-		otsu.ShowLevels(imageWarped);
-		otsu.ReturnThresholds();
-		continue;
+		//OtsuN otsu(imageWarped, 4);
+		//otsu.ShowLevels(imageWarped);
+		//otsu.ReturnThresholds();
+		//continue;
 	}
 	
 	return 0;

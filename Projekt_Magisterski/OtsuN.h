@@ -4,6 +4,10 @@
 class OtsuN
 {
 private:
+	int nOfLevels;
+	cv::Mat image;
+	std::vector<cv::Mat> imageLevels;
+	cv::Mat imageLeveled;
 	double pi[LEVELS] = { 0 };
 	double meanT = 0;
 	double maxBCV = 0;
@@ -13,7 +17,8 @@ private:
 public:
 	OtsuN(cv::Mat image, int nOfLevels);
 	~OtsuN();
-	void ShowLevels(cv::Mat image);
+	void ShowLevels();
+	cv::Mat ReturnLevelImage(int level);
 	std::vector<int> ReturnThresholds();
 };
 

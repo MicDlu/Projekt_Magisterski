@@ -7,7 +7,10 @@ OtsuN::OtsuN(cv::Mat image, int nOfLevels)
 		throw std::invalid_argument("nOfLevels must be higher than 1");
 	if (image.channels() > 1)
 		cvtColor(image, image, cv::COLOR_RGB2GRAY);
+	this->image = image;
+	this->nOfLevels = nOfLevels;
 
+	// init histogram values
 	int histogram[LEVELS] = { 0 };
 	int nOfPixels = image.rows * image.cols;
 	for (int iR = 0; iR < image.rows; iR++)
@@ -18,15 +21,42 @@ OtsuN::OtsuN(cv::Mat image, int nOfLevels)
 			histogram[image.at<uchar>(iR, iC)] += 1;
 		}
 	}
-
 	for (int i = 0; i < LEVELS; i++)
 	{
 		pi[i] = (double)histogram[i] / nOfPixels;
 		meanT += i * pi[i];
 	}
-
 	maxBCV = 0;
+
+	// start recurences
 	NextLevel(nOfLevels-1, 0, 0, 0);
+
+	// create images
+	if (image.channels() > 1)
+		cvtColor(image, image, cv::COLOR_RGB2GRAY);
+	
+	int colorStep = 256 / nOfLevels;
+	imageLeveled = cv::Mat::zeros(image.size(), CV_8U);
+	for (int iI = 0; iI < nOfLevels; iI++)
+	{
+		cv::Mat imageCurrLevel = cv::Mat::zeros(image.size(), CV_8U);
+		cv::Vec2d bounds;
+		bounds[1] = (iI < optimals.size()) ? (optimals[iI]) : (255);
+		bounds[0] = (iI) ? (optimals[iI - 1]) : (0);
+		for (int iR = 0; iR < image.rows; iR++)
+		{
+			for (int iC = 0; iC < image.cols; iC++)
+			{
+				int pixel = image.at<uchar>(iR, iC);
+				if (pixel < bounds[1] && pixel > bounds[0])
+				{
+					imageCurrLevel.at<uchar>(iR, iC) = 255;
+					imageLeveled.at<uchar>(iR, iC) = (iI + 1) * colorStep;
+				}
+			}
+		}
+		imageLevels.push_back(imageCurrLevel);
+	}
 }
 
 
@@ -77,29 +107,19 @@ void OtsuN::NextLevel(int levelNo, double sumP, double sumW, double sumV)
 	}
 }
 
-void OtsuN::ShowLevels(cv::Mat image)
+void OtsuN::ShowLevels()
 {
-	if (image.channels() > 1)
-		cvtColor(image, image, cv::COLOR_RGB2GRAY);
-	cv::Mat image3lvl = cv::Mat::zeros(image.size(), CV_8UC3);
-
-	for (int iR = 0; iR < image.rows; iR++)
-	{
-		for (int iC = 0; iC < image.cols; iC++)
-		{
-			int pixel = image.at<uchar>(iR, iC);
-			for (int iL = 0; iL < optimals.size(); iL++)
-			{
-				if (pixel < optimals[iL])
-				{
-					image3lvl.at<cv::Vec3b>(iR, iC) = cv::Vec3b(50 * iL, 250 - (50 * iL), 0);
-					break;
-				}
-			}
-		}
-	}
-	imshow("Otsu", image3lvl);
+	imshow("All levels", imageLeveled);
 	cv::waitKey(0);
+}
+
+cv::Mat OtsuN::ReturnLevelImage(int level)
+{
+	if (level < 0 || level > optimals.size())
+		throw std::invalid_argument("level not in range");	
+	imshow("Level" + std::to_string(level), imageLevels[level]);
+	cv::waitKey(0);
+	return imageLevels[level];
 }
 
 std::vector<int> OtsuN::ReturnThresholds()
