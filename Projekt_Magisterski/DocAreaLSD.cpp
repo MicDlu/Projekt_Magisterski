@@ -4,49 +4,55 @@
 DocAreaLSD::DocAreaLSD(cv::Mat src)
 {
 	// Pass variable
-	imageOriginal = src;
+	src.copyTo(imageOriginal);
+	cv::Mat imageLSD;
+	src.copyTo(imageLSD);
 
 	// Init LSD
 	lsd = cv::createLineSegmentDetector(cv::LSD_REFINE_ADV);
 
 	// Preprocess for LSD
-	//cv::Mat imageResized;
-	//cv::resize(imageOriginal, imageResized, lsdImageSize);
-	cv::Mat imagePre = PreprocessLSD(imageOriginal);
-	//src = imagePre;
-	//cv::imshow("test", imageOriginal);
-	//cv::waitKey(0);
-	//cv::imshow("test", src);
-	//cv::waitKey(0);
+	cv::Mat imagePre;
+	if (RESIZE_LSD)
+	{
+		cv::Mat imageResized;
+		cv::resize(imageOriginal, imageResized, lsdImageSize);
+		imagePre = PreprocessLSD(imageResized);
+	}
+	else
+		imagePre = PreprocessLSD(imageOriginal);
+
 	// Extended LSD
 	std::vector<cv::Vec4f> lines_ext = GetExtendedLSD(imagePre);
-	//lsd->drawSegments(src, lines_ext);
 
 	// scale extends
-	//std::vector<cv::Vec4f> lines_org = ScaleExtends(lines_ext);
-	//lsd->drawSegments(src, lines_org);
+	if (RESIZE_LSD)
+		lines_ext = ScaleExtends(lines_ext);
 
 	// Get ~90 angles intersections that fit in image
 	std::vector<cv::Point2f> intersectionPoints = GetIntersectionPoints(lines_ext);
 
 	// Calc quadliterals
 	std::vector<cv::Point2f>* quadPoints = GetQuadliteralPoints(intersectionPoints);
-
 	for (int q = 0; q < 4; q++)
-	{
 		quadliterals.push_back(GetMedianPoint(quadPoints[q]));
 
-		// Draw intersection points
-		for (int i = 0; i < quadPoints[q].size(); i++)
+	if (DRAW_LSD)
+	{
+		// DRAW LSD LINES
+		lsd->drawSegments(imageLSD, lines_ext);
+		for (int q = 0; q < 4; q++)
 		{
-			//cv::circle(src, quadPoints[q][i], 1, cv::Scalar(0, 255, 0), 2);
-		}
-		// Draw quad point
-		//cv::circle(src, quadliterals[q], 5, cv::Scalar(255, 0, 255), 5);
-	}
+			// Draw intersection points
+			for (int i = 0; i < quadPoints[q].size(); i++)
+				cv::circle(imageLSD, quadPoints[q][i], 1, cv::Scalar(0, 255, 0), 2);
 
-	//cv::imshow("test", src);
-	//cv::waitKey(0);
+			// Draw quad point
+			cv::circle(imageLSD, quadliterals[q], 5, cv::Scalar(255, 0, 255), 5);
+		}
+		cv::imshow("test", imageLSD);
+		cv::waitKey(0);
+	}
 }
 
 std::vector<cv::Point2f>* DocAreaLSD::GetQuadliteralPoints(std::vector<cv::Point2f> &intersectionPoints)

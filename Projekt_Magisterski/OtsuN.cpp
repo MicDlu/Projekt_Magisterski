@@ -56,21 +56,25 @@ OtsuN::OtsuN(cv::Mat image, int nOfLevels = 3)
 		imageLevels.push_back(imageCurrLevel);
 	}
 
-	// fix levels 
-	/*
-	//variant #1
-	cv::Mat reducer;
-	cv::dilate(imageLevels[2], reducer, cv::Mat::ones(cv::Size(3,3), CV_8U));
-	cv::Mat v1 = imageLevels[1] - reducer;
+	// fix levels
+	if (OTSU_LEVELFIX)
+	{
+		imshow("level1 before fix", imageLevels[1]);
 
-	// variant #2
-	cv::morphologyEx(imageLevels[1], reducer, cv::MORPH_OPEN, cv::Mat::ones(cv::Size(2, 2), CV_8U));
-	cv::Mat v2 = reducer;
+		//variant #1
+		cv::Mat reducer;
+		cv::dilate(imageLevels[2], reducer, cv::Mat::ones(cv::Size(3, 3), CV_8U));
+		cv::Mat v1 = imageLevels[1] - reducer;
+		imshow("level1 after fix", v1);
 
-	imshow("l1", imageLevels[1]);
-	imshow("v1", v1);
-	imshow("v2", v2);
-	cv::waitKey(0);*/
+		//// variant #2
+		//cv::morphologyEx(imageLevels[1], reducer, cv::MORPH_OPEN, cv::Mat::ones(cv::Size(2, 2), CV_8U));
+		//cv::Mat v2 = reducer;
+		//imshow("v2", v2);
+
+		imageLevels[1] = v1;
+		cv::waitKey(0);
+	}
 }
 
 

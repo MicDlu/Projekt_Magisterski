@@ -9,18 +9,24 @@ int main()
 	std::vector<cv::String> files = GetFiles();
 
 	// OTSU 3 LEVEL PAPER THRESHOLDING
-	for (int i = 0; i < files.size(); i++)
-	{
-		cv::Mat imageInput = cv::imread(files[i]);
-		cv::Mat imageFixSize = FixImageSize(imageInput);
-		cv::Mat imageExtract = RemoveBackground(imageFixSize);
-		imageExtract = ReduceVariety(imageExtract);
-		OtsuN otsu(imageExtract, 3);
-		otsu.ReturnLeveledImage();
-		otsu.ReturnLevelImage(0);
-		otsu.ReturnLevelImage(1);
-		otsu.ReturnLevelImage(2);
-	}*/
+	if (OTSU_1)
+		for (int i = 0; i < files.size(); i++)
+		{
+			cv::Mat imageInput = cv::imread(files[i]);
+			cv::Mat imageFixSize = FixImageSize(imageInput);
+			cv::Mat imageExtract = RemoveBackground(imageFixSize);
+			imageExtract = ReduceVariety(imageExtract);
+			OtsuN otsu(imageExtract, 3);
+			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
+			cv::Mat imageLevel1 = otsu.ReturnLevelImage(0);
+			cv::Mat imageLevel2 = otsu.ReturnLevelImage(1);
+			cv::Mat imageLevel3 = otsu.ReturnLevelImage(2);
+			cv::imshow("image all levels", imageLevelAll);
+			cv::imshow("image level 1", imageLevel1);
+			cv::imshow("image level 2", imageLevel2);
+			cv::imshow("image level 3", imageLevel3);
+			cv::waitKey(0);
+		}
 
 	//std::vector<cv::String> files = GetFiles();
 	for (int i = 0; i < files.size(); i++)
@@ -32,18 +38,13 @@ int main()
 		std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
 
 		// DRAW  EDGE POINTS
-		/*for (int q = 0; q < 4; q++)
-			cv::circle(imageFixSize, quads[q], 10, cv::Scalar(150, 150, 0), 5);
-		cv::imshow("test", imageFixSize);
-		cv::waitKey(0);
-
-		cv::Mat imageMask = cv::Mat::zeros(imageFixSize.size(), CV_8UC3);
-		cv::fillConvexPoly(imageMask, quads, cv::Scalar(255, 255, 255));
-
-		cv::Mat imageMasked;
-		cv::bitwise_and(imageFixSize, imageMask, imageMasked);
-		cv::imshow("test", imageMasked);
-		cv::waitKey(0);*/
+		if (DRAW_EDGE)
+		{
+			for (int q = 0; q < 4; q++)
+				cv::circle(imageFixSize, quads[q], 10, cv::Scalar(150, 150, 0), 5);
+			cv::imshow("edges", imageFixSize);
+			cv::waitKey(0);
+		}
 
 		// PERSPECTIVE TRANSFORM
 		std::vector<cv::Point2f> quadSource;
@@ -59,46 +60,56 @@ int main()
 		cv::Mat transform = cv::getPerspectiveTransform(quadSource, quadDestination);
 		cv::Mat imageWarped;
 		cv::warpPerspective(imageFixSize, imageWarped, transform, imageFixSize.size());
-		/*cv::imshow("warped", imageWarped);
-		cv::waitKey(0);*/
+		cv::imshow("warped", imageWarped);
+		cv::waitKey(0);
 
 		// 3- level thresholding
-		cv::Mat	imageExtract = ReduceVariety(imageWarped);
-		OtsuN otsu(imageExtract, 3);
-		otsu.ReturnLeveledImage();
-		//otsu.ReturnLevelImage(0);
-		//otsu.ReturnLevelImage(1);
-		//otsu.ReturnLevelImage(2);
-		cv::destroyAllWindows();
+		if (OTSU_2)
+		{
+			cv::Mat	imageExtract = ReduceVariety(imageWarped);
+			OtsuN otsu(imageExtract, 3);
+			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
+			cv::Mat imageLevel1 = otsu.ReturnLevelImage(0);
+			cv::Mat imageLevel2 = otsu.ReturnLevelImage(1);
+			cv::Mat imageLevel3 = otsu.ReturnLevelImage(2);
+			cv::imshow("image all levels", imageLevelAll);
+			cv::imshow("image level 1", imageLevel1);
+			cv::imshow("image level 2", imageLevel2);
+			cv::imshow("image level 3", imageLevel3);
+			cv::waitKey(0);
+			cv::destroyAllWindows();
+		}
 
 		// HOUGH
-		cv::Mat houghInput;
-		cv::Canny(imageFixSize, houghInput, 50, 200);
-		imshow("houghp", houghInput);
-		cv::waitKey(0);
-		std::vector<cv::Vec2f> lines;
-
-		cv::HoughLines(houghInput, lines,1,CV_PI/180, 100,0,0);
-
-		cv::Mat houghTemp = cv::Mat::zeros(houghInput.size(), CV_8U);
-		for (size_t i = 0; i < lines.size(); i++)
+		if (HOUGH)
 		{
-			float rho = lines[i][0], theta = lines[i][1];
-			cv::Point pt1, pt2;
-			double a = cos(theta), b = sin(theta);
-			double x0 = a * rho, y0 = b * rho;
-			pt1.x = cvRound(x0 + 500 * (-b));
-			pt1.y = cvRound(y0 + 500 * (a));
-			pt2.x = cvRound(x0 - 500 * (-b));
-			pt2.y = cvRound(y0 - 500 * (a));
-			cv::line(houghTemp, pt1, pt2, cv::Scalar(0, 0, 255), 3, cv::LINE_AA);
-			cv::circle(houghTemp, pt1, 2, cv::Scalar(255, 0, 0), 2);
-			cv::circle(houghTemp, pt2, 2, cv::Scalar(255, 0, 0), 2);
+			cv::Mat houghInput;
+			cv::Canny(imageFixSize, houghInput, 50, 200);
+			imshow("houghp", houghInput);
+			cv::waitKey(0);
+			std::vector<cv::Vec2f> lines;
+
+			cv::HoughLines(houghInput, lines, 1, CV_PI / 180, 100, 0, 0);
+
+			cv::Mat houghTemp = cv::Mat::zeros(houghInput.size(), CV_8U);
+			for (size_t i = 0; i < lines.size(); i++)
+			{
+				float rho = lines[i][0], theta = lines[i][1];
+				cv::Point pt1, pt2;
+				double a = cos(theta), b = sin(theta);
+				double x0 = a * rho, y0 = b * rho;
+				pt1.x = cvRound(x0 + 500 * (-b));
+				pt1.y = cvRound(y0 + 500 * (a));
+				pt2.x = cvRound(x0 - 500 * (-b));
+				pt2.y = cvRound(y0 - 500 * (a));
+				cv::line(houghTemp, pt1, pt2, cv::Scalar(0, 0, 255), 3, cv::LINE_AA);
+				cv::circle(houghTemp, pt1, 2, cv::Scalar(255, 0, 0), 2);
+				cv::circle(houghTemp, pt2, 2, cv::Scalar(255, 0, 0), 2);
+			}
+			imshow("hough", houghTemp);
+			cv::waitKey(0);
 		}
-		imshow("hough", houghTemp);
-		cv::waitKey(0);
 	}
-	
 	return 0;
 }
 

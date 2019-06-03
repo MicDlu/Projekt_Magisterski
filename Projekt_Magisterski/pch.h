@@ -8,6 +8,14 @@
 
 #ifndef PCH_H
 #define PCH_H
+#define OTSU_1 FALSE
+#define OTSU_2 TRUE
+#define HOUGH FALSE
+#define DRAW_EDGE FALSE
+#define DRAW_LSD TRUE
+#define RESIZE_LSD FALSE
+#define OTSU_LEVELFIX FALSE
+
 
 // TODO: add headers that you want to pre-compile here
 
