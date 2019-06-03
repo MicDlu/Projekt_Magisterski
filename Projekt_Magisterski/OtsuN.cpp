@@ -1,14 +1,15 @@
 #include "pch.h"
 #include "OtsuN.h"
 
-OtsuN::OtsuN(cv::Mat image, int nOfLevels)
+OtsuN::OtsuN(cv::Mat image, int nOfLevels = 3)
 {
 	if (nOfLevels <= 1)
 		throw std::invalid_argument("nOfLevels must be higher than 1");
-	if (image.channels() > 1)
-		cvtColor(image, image, cv::COLOR_RGB2GRAY);
+
 	this->image = image;
 	this->nOfLevels = nOfLevels;
+	if (image.channels() > 1)
+		cvtColor(image, image, cv::COLOR_RGB2GRAY);
 
 	// init histogram values
 	int histogram[LEVELS] = { 0 };
@@ -32,23 +33,20 @@ OtsuN::OtsuN(cv::Mat image, int nOfLevels)
 	NextLevel(nOfLevels-1, 0, 0, 0);
 
 	// create images
-	if (image.channels() > 1)
-		cvtColor(image, image, cv::COLOR_RGB2GRAY);
-	
 	int colorStep = 256 / nOfLevels;
 	imageLeveled = cv::Mat::zeros(image.size(), CV_8U);
 	for (int iI = 0; iI < nOfLevels; iI++)
 	{
 		cv::Mat imageCurrLevel = cv::Mat::zeros(image.size(), CV_8U);
 		cv::Vec2d bounds;
-		bounds[1] = (iI < optimals.size()) ? (optimals[iI]) : (255);
+		bounds[1] = (iI < optimals.size()) ? (optimals[iI]) : (256);
 		bounds[0] = (iI) ? (optimals[iI - 1]) : (0);
 		for (int iR = 0; iR < image.rows; iR++)
 		{
 			for (int iC = 0; iC < image.cols; iC++)
 			{
 				int pixel = image.at<uchar>(iR, iC);
-				if (pixel < bounds[1] && pixel > bounds[0])
+				if (pixel < bounds[1] && pixel >= bounds[0])
 				{
 					imageCurrLevel.at<uchar>(iR, iC) = 255;
 					imageLeveled.at<uchar>(iR, iC) = (iI + 1) * colorStep;
@@ -57,6 +55,22 @@ OtsuN::OtsuN(cv::Mat image, int nOfLevels)
 		}
 		imageLevels.push_back(imageCurrLevel);
 	}
+
+	// fix levels 
+	/*
+	//variant #1
+	cv::Mat reducer;
+	cv::dilate(imageLevels[2], reducer, cv::Mat::ones(cv::Size(3,3), CV_8U));
+	cv::Mat v1 = imageLevels[1] - reducer;
+
+	// variant #2
+	cv::morphologyEx(imageLevels[1], reducer, cv::MORPH_OPEN, cv::Mat::ones(cv::Size(2, 2), CV_8U));
+	cv::Mat v2 = reducer;
+
+	imshow("l1", imageLevels[1]);
+	imshow("v1", v1);
+	imshow("v2", v2);
+	cv::waitKey(0);*/
 }
 
 
@@ -107,10 +121,11 @@ void OtsuN::NextLevel(int levelNo, double sumP, double sumW, double sumV)
 	}
 }
 
-void OtsuN::ShowLevels()
+cv::Mat OtsuN::ReturnLeveledImage()
 {
 	imshow("All levels", imageLeveled);
 	cv::waitKey(0);
+	return imageLeveled;
 }
 
 cv::Mat OtsuN::ReturnLevelImage(int level)

@@ -6,8 +6,9 @@
 
 int main()
 {
-
 	std::vector<cv::String> files = GetFiles();
+
+	// OTSU 3 LEVEL PAPER THRESHOLDING
 	for (int i = 0; i < files.size(); i++)
 	{
 		cv::Mat imageInput = cv::imread(files[i]);
@@ -15,28 +16,36 @@ int main()
 		cv::Mat imageExtract = RemoveBackground(imageFixSize);
 		imageExtract = ReduceVariety(imageExtract);
 		OtsuN otsu(imageExtract, 3);
-		otsu.ShowLevels();
+		otsu.ReturnLeveledImage();
 		otsu.ReturnLevelImage(0);
 		otsu.ReturnLevelImage(1);
 		otsu.ReturnLevelImage(2);
-		continue;
+	}*/
+
+	//std::vector<cv::String> files = GetFiles();
+	for (int i = 0; i < files.size(); i++)
+	{
+		cv::Mat imageInput = cv::imread(files[i]);
+		cv::Mat imageFixSize = FixImageSize(imageInput);
 
 		DocAreaLSD docAreaLSD(imageFixSize);
 		std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
+
 		// DRAW  EDGE POINTS
-		//for (int q = 0; q < 4; q++)
-		//	cv::circle(imageFixSize, quads[q], 10, cv::Scalar(150, 150, 0), 5);
-		//cv::imshow("test", imageFixSize);
-		//cv::waitKey(0);
+		/*for (int q = 0; q < 4; q++)
+			cv::circle(imageFixSize, quads[q], 10, cv::Scalar(150, 150, 0), 5);
+		cv::imshow("test", imageFixSize);
+		cv::waitKey(0);
 
 		cv::Mat imageMask = cv::Mat::zeros(imageFixSize.size(), CV_8UC3);
 		cv::fillConvexPoly(imageMask, quads, cv::Scalar(255, 255, 255));
 
 		cv::Mat imageMasked;
 		cv::bitwise_and(imageFixSize, imageMask, imageMasked);
-		//cv::imshow("test", imageMasked);
-		//cv::waitKey(0);
+		cv::imshow("test", imageMasked);
+		cv::waitKey(0);*/
 
+		// PERSPECTIVE TRANSFORM
 		std::vector<cv::Point2f> quadSource;
 		for (int q = 0; q < 4; q++)
 			quadSource.push_back(cv::Point2f(quads[q].x, quads[q].y));
@@ -49,12 +58,45 @@ int main()
 
 		cv::Mat transform = cv::getPerspectiveTransform(quadSource, quadDestination);
 		cv::Mat imageWarped;
-		cv::warpPerspective(imageMasked, imageWarped, transform, imageFixSize.size());
+		cv::warpPerspective(imageFixSize, imageWarped, transform, imageFixSize.size());
+		/*cv::imshow("warped", imageWarped);
+		cv::waitKey(0);*/
 
-		//OtsuN otsu(imageWarped, 4);
-		//otsu.ShowLevels(imageWarped);
-		//otsu.ReturnThresholds();
-		//continue;
+		// 3- level thresholding
+		cv::Mat	imageExtract = ReduceVariety(imageWarped);
+		OtsuN otsu(imageExtract, 3);
+		otsu.ReturnLeveledImage();
+		//otsu.ReturnLevelImage(0);
+		//otsu.ReturnLevelImage(1);
+		//otsu.ReturnLevelImage(2);
+		cv::destroyAllWindows();
+
+		// HOUGH
+		cv::Mat houghInput;
+		cv::Canny(imageFixSize, houghInput, 50, 200);
+		imshow("houghp", houghInput);
+		cv::waitKey(0);
+		std::vector<cv::Vec2f> lines;
+
+		cv::HoughLines(houghInput, lines,1,CV_PI/180, 100,0,0);
+
+		cv::Mat houghTemp = cv::Mat::zeros(houghInput.size(), CV_8U);
+		for (size_t i = 0; i < lines.size(); i++)
+		{
+			float rho = lines[i][0], theta = lines[i][1];
+			cv::Point pt1, pt2;
+			double a = cos(theta), b = sin(theta);
+			double x0 = a * rho, y0 = b * rho;
+			pt1.x = cvRound(x0 + 500 * (-b));
+			pt1.y = cvRound(y0 + 500 * (a));
+			pt2.x = cvRound(x0 - 500 * (-b));
+			pt2.y = cvRound(y0 - 500 * (a));
+			cv::line(houghTemp, pt1, pt2, cv::Scalar(0, 0, 255), 3, cv::LINE_AA);
+			cv::circle(houghTemp, pt1, 2, cv::Scalar(255, 0, 0), 2);
+			cv::circle(houghTemp, pt2, 2, cv::Scalar(255, 0, 0), 2);
+		}
+		imshow("hough", houghTemp);
+		cv::waitKey(0);
 	}
 	
 	return 0;

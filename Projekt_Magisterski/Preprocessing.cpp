@@ -23,13 +23,14 @@ std::vector<cv::String> GetFiles()
 	cv::String directory = "C:/Users/micha/Pictures/Images/";
 	//files.push_back(directory + "IMG_20190525_115849.jpg");
 	files.push_back(directory + "IMG_20190228_195957.jpg");
-	files.push_back(directory + "IMG_20190228_200009.jpg");
+	//files.push_back(directory + "IMG_20190228_200009.jpg"); // finger
 	files.push_back(directory + "IMG_20190228_200028.jpg");
 	files.push_back(directory + "IMG_20190228_200050.jpg");
 	files.push_back(directory + "IMG_20190228_200058.jpg");
 	return files;
 }
 
+//https://stackoverflow.com/questions/44047819/increase-image-brightness-without-overflow/44054699#44054699
 cv::Mat RemoveBackground(cv::Mat image)
 {
 	cv::Mat hsv;

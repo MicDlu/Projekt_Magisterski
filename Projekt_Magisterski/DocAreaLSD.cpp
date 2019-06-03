@@ -129,7 +129,7 @@ cv::Mat DocAreaLSD::PreprocessLSD(cv::Mat inputImage)
 	//cv::Mat kernel = cv::getGaussianKernel(ksize,sigma);
 	//kernel = kernel * kernel.t()*4;
 
-	PrintMat(kernel);
+	//PrintMat(kernel);
 
 	cv::morphologyEx(imageProcess, imageProcess, cv::MORPH_CLOSE, kernel);
 	//cv::GaussianBlur(imageProcess, imageProcess, cv::Size(ksize, ksize), 5);
