@@ -141,6 +141,11 @@ cv::Mat OtsuN::ReturnLevelImage(int level)
 	return imageLevels[level];
 }
 
+std::vector<cv::Mat> OtsuN::ReturnImageLevels()
+{
+	return imageLevels;
+}
+
 std::vector<int> OtsuN::ReturnThresholds()
 {
 	return optimals;

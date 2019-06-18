@@ -19,6 +19,7 @@ public:
 	~OtsuN();
 	cv::Mat ReturnLeveledImage();
 	cv::Mat ReturnLevelImage(int level);
+	std::vector<cv::Mat> ReturnImageLevels();
 	std::vector<int> ReturnThresholds();
 };
 

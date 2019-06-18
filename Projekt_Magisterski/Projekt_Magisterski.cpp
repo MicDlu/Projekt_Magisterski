@@ -18,16 +18,14 @@ int main()
 			cv::Mat imagePreOtsu = OtsuPreReduceVariety(imageExtract);
 			OtsuN otsu(imagePreOtsu, 3);
 			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
-			cv::Mat imageLevel1 = otsu.ReturnLevelImage(0);
-			cv::Mat imageLevel2 = otsu.ReturnLevelImage(1);
-			cv::Mat imageLevel3 = otsu.ReturnLevelImage(2);
+			std::vector<cv::Mat> imageLevels = otsu.ReturnImageLevels();
 			//cv::imshow("image all levels", imageLevelAll);
-			//cv::imshow("image level 1", imageLevel1);
-			//cv::imshow("image level 2", imageGridLevel);
-			//cv::imshow("image level 3", imageLevel3);
-			//cv::waitKey(0);
+			/*cv::imshow("image level 1", imageLevels[0]);
+			cv::imshow("image level 2", imageLevels[1]);
+			cv::imshow("image level 3", imageLevels[2]);
+			cv::waitKey(0);*/
 
-			std::vector<cv::Point2f> intersectionPoints = GetGridLevelIntersections(imageLevel2);
+			std::vector<cv::Point2f> intersectionPoints = GetGridLevelIntersections(imageLevels[1]);
 			cv::RNG rng(12345);
 			cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_SIZE, CV_8UC3);
 			cv::copyTo(imageExtract, imageIntersections, cv::Mat::ones(IMAGE_SIZE, CV_8U));
@@ -41,6 +39,8 @@ int main()
 			cv::destroyAllWindows();
 		}
 
+	// Temporary deprecated
+	/*
 	//std::vector<cv::String> files = GetFiles();
 	for (int i = 0; i < files.size(); i++)
 	{
@@ -82,19 +82,19 @@ int main()
 			cv::Mat	imageExtract = ReduceVariety(imageWarped);
 			OtsuN otsu(imageExtract, 3);
 			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
-			cv::Mat imageLevel1 = otsu.ReturnLevelImage(0);
-			cv::Mat imageLevel2 = otsu.ReturnLevelImage(1);
-			cv::Mat imageLevel3 = otsu.ReturnLevelImage(2);
-			cv::imshow("image all levels", imageLevelAll);
-			cv::imshow("image level 1", imageLevel1);
-			cv::imshow("image level 2", imageLevel2);
-			cv::imshow("image level 3", imageLevel3);
-			cv::waitKey(0);
-			cv::destroyAllWindows();
+			std::vector<cv::Mat> imageLevels = otsu.ReturnImageLevels();
+			//cv::imshow("image all levels", imageLevelAll);
+			//cv::imshow("image level 1", imageLevels[0]);
+			//cv::imshow("image level 2", imageLevels[1]);
+			//cv::imshow("image level 3", imageLevels[2]);
+			//cv::waitKey(0);
+			//cv::destroyAllWindows();
 		}
 	}
+	*/
 	return 0;
 }
+
 
 std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 {
@@ -104,6 +104,7 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 	//cv::imshow(std::to_string(windowNo++), imageGridLevel);
 
 	// Calculate Harris Corners
+	// https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_feature2d/py_features_harris/py_features_harris.html
 	cv::Mat imageHarris = cv::Mat::zeros(imageGridLevel.size(), CV_8U);
 	cv::cornerHarris(imageGridLevel, imageHarris, 4, 3, 0.05);
 	//cv::imshow(std::to_string(windowNo++), imageHarris);
