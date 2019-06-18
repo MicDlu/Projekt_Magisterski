@@ -3,8 +3,7 @@
 cv::Mat FixImageSize(cv::Mat input)
 {
 	cv::Mat output;
-	cv::Size resizeSize = cv::Size(800, 600);
-	cv::resize(input, output, resizeSize);
+	cv::resize(input, output, IMAGE_SIZE);
 	return output;
 }
 
@@ -53,7 +52,7 @@ cv::Mat RemoveBackground(cv::Mat image)
 	return imageOutput;
 }
 
-cv::Mat ReduceVariety(cv::Mat image)
+cv::Mat OtsuPreReduceVariety(cv::Mat image)
 {
 	cv::Mat hsv;
 	cvtColor(image, hsv, cv::COLOR_BGR2HSV);
@@ -66,6 +65,32 @@ cv::Mat ReduceVariety(cv::Mat image)
 	cv::medianBlur(imageMask, imageMask, 21);
 	//cv::imshow("2.median blur", imageMask);
 	cv::absdiff(hsvChannels[2], imageMask, imageOutput);
+	//cv::imshow("3.difference", imageOutput);
+
+	//cv::waitKey(0);
+	return imageOutput;
+}
+
+cv::Mat ReduceVariety(cv::Mat image)
+{
+	cv::Mat hsv;
+	cvtColor(image, hsv, cv::COLOR_BGR2HSV);
+	std::vector<cv::Mat> hsvChannels;
+	split(hsv, hsvChannels);
+
+	//cv::imshow("0.input", hsvChannels[2]);
+	cv::Mat imageMask, imageOutput;;
+	cv::dilate(hsvChannels[2], imageMask, cv::Mat::ones(cv::Size(7, 7), CV_8U));
+	//cv::imshow("1.dilate", imageMask);
+	cv::medianBlur(imageMask, imageMask, 21);
+	//cv::imshow("2.median blur", imageMask);
+	cv::absdiff(hsvChannels[2], imageMask, imageOutput);
+	cv::normalize(imageOutput, imageOutput, 0, 255, cv::NORM_MINMAX, CV_8U);
+	cv::Mat imageBackground = cv::Mat::zeros(image.size(), CV_8U);
+	cv::threshold(hsvChannels[2], imageBackground, 0, 255, cv::ThresholdTypes::THRESH_BINARY_INV);
+	//cv::imshow("backgr", imageBackground);
+	cv::absdiff(imageOutput, imageBackground, imageOutput);
+	cv::bitwise_not(imageOutput, imageOutput);
 	//cv::imshow("3.difference", imageOutput);
 
 	//cv::waitKey(0);

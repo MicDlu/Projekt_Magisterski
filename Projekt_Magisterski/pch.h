@@ -8,13 +8,14 @@
 
 #ifndef PCH_H
 #define PCH_H
-#define OTSU_1 FALSE
+#define OTSU_1 TRUE
 #define OTSU_2 TRUE
 #define HOUGH FALSE
 #define DRAW_EDGE FALSE
-#define DRAW_LSD TRUE
+#define DRAW_LSD FALSE
 #define RESIZE_LSD FALSE
-#define OTSU_LEVELFIX FALSE
+#define OTSU_LEVELFIX TRUE
+#define IMAGE_SIZE cv::Size(800,600)
 
 
 // TODO: add headers that you want to pre-compile here

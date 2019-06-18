@@ -59,13 +59,13 @@ OtsuN::OtsuN(cv::Mat image, int nOfLevels = 3)
 	// fix levels
 	if (OTSU_LEVELFIX)
 	{
-		imshow("level1 before fix", imageLevels[1]);
+		//imshow("level1 before fix", imageLevels[1]);
 
 		//variant #1
 		cv::Mat reducer;
 		cv::dilate(imageLevels[2], reducer, cv::Mat::ones(cv::Size(3, 3), CV_8U));
 		cv::Mat v1 = imageLevels[1] - reducer;
-		imshow("level1 after fix", v1);
+		//imshow("level1 after fix", v1);
 
 		//// variant #2
 		//cv::morphologyEx(imageLevels[1], reducer, cv::MORPH_OPEN, cv::Mat::ones(cv::Size(2, 2), CV_8U));
@@ -73,7 +73,7 @@ OtsuN::OtsuN(cv::Mat image, int nOfLevels = 3)
 		//imshow("v2", v2);
 
 		imageLevels[1] = v1;
-		cv::waitKey(0);
+		//cv::waitKey(0);
 	}
 }
 
@@ -127,8 +127,8 @@ void OtsuN::NextLevel(int levelNo, double sumP, double sumW, double sumV)
 
 cv::Mat OtsuN::ReturnLeveledImage()
 {
-	imshow("All levels", imageLeveled);
-	cv::waitKey(0);
+	/*imshow("All levels", imageLeveled);
+	cv::waitKey(0);*/
 	return imageLeveled;
 }
 
@@ -136,8 +136,8 @@ cv::Mat OtsuN::ReturnLevelImage(int level)
 {
 	if (level < 0 || level > optimals.size())
 		throw std::invalid_argument("level not in range");	
-	imshow("Level" + std::to_string(level), imageLevels[level]);
-	cv::waitKey(0);
+	//imshow("Level" + std::to_string(level), imageLevels[level]);
+	//cv::waitKey(0);
 	return imageLevels[level];
 }
 
