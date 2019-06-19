@@ -7,7 +7,7 @@
 int main()
 {
 	std::vector<cv::String> files = GetFiles();
-
+	
 	// OTSU 3 LEVEL PAPER THRESHOLDING
 	if (OTSU_1)
 		for (int i = 0; i < files.size(); i++)
@@ -25,10 +25,12 @@ int main()
 			cv::imshow("image level 3", imageLevels[2]);
 			cv::waitKey(0);*/
 
+			//TrackbarIntersectionPoints(imageLevels[1]);
+
 			std::vector<cv::Point2f> intersectionPoints = GetGridLevelIntersections(imageLevels[1]);
 			cv::RNG rng(12345);
 			cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_SIZE, CV_8UC3);
-			cv::copyTo(imageExtract, imageIntersections, cv::Mat::ones(IMAGE_SIZE, CV_8U));
+			//cv::copyTo(imageExtract, imageIntersections, cv::Mat::ones(IMAGE_SIZE, CV_8U));
 			for (int i = 0; i < intersectionPoints.size(); i++)
 			{
 				circle(imageIntersections, intersectionPoints[i], 2, cv::Scalar(0, 0, 255), -1, 8, 0);
@@ -98,6 +100,12 @@ int main()
 
 std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 {
+	// Parameters
+	int harrisBlock = 3;
+	int harrisKSize = 3;
+	int harrisK = 0.05; // whatever
+	int erodeSize = 4;
+
 	int windowNo = 0;
 	if (imageGridLevel.channels() > 1)
 		cvtColor(imageGridLevel, imageGridLevel, cv::COLOR_RGB2GRAY);
@@ -106,12 +114,12 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 	// Calculate Harris Corners
 	// https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_feature2d/py_features_harris/py_features_harris.html
 	cv::Mat imageHarris = cv::Mat::zeros(imageGridLevel.size(), CV_8U);
-	cv::cornerHarris(imageGridLevel, imageHarris, 4, 3, 0.05);
+	cv::cornerHarris(imageGridLevel, imageHarris, harrisBlock, harrisKSize, harrisK);
 	//cv::imshow(std::to_string(windowNo++), imageHarris);
 
 	// Binarize corner pixels
-	cv::erode(imageHarris, imageHarris, cv::Mat::ones(cv::Size(3, 3), CV_8U));
-	cv::imshow(std::to_string(windowNo++), imageHarris);
+	cv::erode(imageHarris, imageHarris, cv::Mat::ones(cv::Size(erodeSize, erodeSize), CV_8U));
+	//cv::imshow(std::to_string(windowNo++), imageHarris);
 	cv::threshold(imageHarris, imageHarris, 0.01, 1, cv::ThresholdTypes::THRESH_BINARY);
 	//cv::imshow(std::to_string(windowNo++), imageHarris);
 
@@ -120,7 +128,7 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 	// https://docs.opencv.org/2.4/doc/tutorials/imgproc/shapedescriptors/moments/moments.html
 	imageHarris.convertTo(imageHarris, CV_8U, 255);
 	std::vector<std::vector<cv::Point>> contours;
-	cv::findContours(imageHarris, contours, cv::RETR_TREE, cv::CHAIN_APPROX_SIMPLE);
+	cv::findContours(imageHarris, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
 	cv::Mat imageCont = cv::Mat::zeros(imageGridLevel.size(), CV_8U);
 	std::vector<cv::Moments> mu(contours.size());
 	std::vector<cv::Point2f> mc(contours.size());

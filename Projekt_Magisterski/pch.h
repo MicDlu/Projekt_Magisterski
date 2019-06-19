@@ -33,5 +33,6 @@
 #include "LineExtender.h"
 #include "DocAreaLSD.h"
 #include "OtsuN.h"
+#include "Testing.h"
 
 #endif //PCH_H
