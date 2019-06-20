@@ -35,8 +35,21 @@ int main()
 			cv::copyTo(imageRemBkgd, imageIntersections, cv::Mat::ones(IMAGE_FIX_SIZE, CV_8U));
 			for (int i = 0; i < intersectionPoints.size(); i++)
 			{
-				circle(imageIntersections, intersectionPoints[i], 2, cv::Scalar(0, 0, 255), -1, 8, 0);
+				circle(imageIntersections, intersectionPoints[i], 2, cv::Scalar(0, 0, 255), -1);
 			}
+
+			/////////////
+			for (int i = 0; i < intersectionPoints.size(); i++)
+			{
+				cv::Mat test = imageIntersections.clone();			
+				cv::Point2f lookPnt = intersectionPoints[i];
+				cv::Point2f nearestPnt = FindNearestPoint(intersectionPoints, lookPnt);
+				circle(test, lookPnt, 5, cv::Scalar(0, 255, 0), 2);
+				circle(test, nearestPnt, 5, cv::Scalar(255, 0, 0), 2);
+				cv::imshow("test", test);
+				cv::waitKey(0);
+			}
+			/////////////
 			cv::imshow("Intersection Points", imageIntersections);
 			cv::waitKey(0);
 
@@ -97,6 +110,23 @@ int main()
 	}
 	*/
 	return 0;
+}
+
+cv::Point2f FindNearestPoint(std::vector<cv::Point2f> &intersectionPoints, cv::Point2f &pnt)
+{
+	// https://stackoverflow.com/questions/9825959/find-closest-neighbors-opencv
+	cv::flann::KDTreeIndexParams indexParams;
+	cv::flann::Index kdtree(cv::Mat(intersectionPoints).reshape(1), indexParams);
+	std::vector<float> query;
+	query.push_back(pnt.x);
+	query.push_back(pnt.y);
+	std::vector<int> indices;
+	std::vector<float> dists;
+	kdtree.knnSearch(query, indices, dists, 2);
+	// Reject entry point
+	for (int i = 0; i < 2; i++)	
+		if (dists[i] != 0)
+			return intersectionPoints[indices[i]];	
 }
 
 void RemoveOtherPage(cv::Mat &imageRemBkgd, const cv::Mat &imageFixSize)
@@ -200,24 +230,27 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(imageHarris, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
 	cv::Mat imageCont = cv::Mat::zeros(imageGridLevel.size(), CV_8U);
-	std::vector<cv::Moments> mu(contours.size());
-	std::vector<cv::Point2f> mc(contours.size());
+	cv::Moments mu;
+	std::vector<cv::Point2f> mc;
 	for (int i = 0; i < contours.size(); i++)
 	{
-		mu[i] = moments(contours[i], true);
-		mc[i] = cv::Point2f(mu[i].m10 / mu[i].m00, mu[i].m01 / mu[i].m00);
+		mu = moments(contours[i], true);
+		if (mu.m00 != 0)
+			mc.push_back(cv::Point2f(mu.m10 / mu.m00, mu.m01 / mu.m00));
 	}
 
 	//cv::RNG rng(12345);
 	//cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_FIX_SIZE, CV_8UC3);
 	//cv::copyTo(imageGridLevel, imageIntersections, cv::Mat::ones(IMAGE_FIX_SIZE, CV_8U));
-	//for (int i = 0; i < mu.size(); i++)
+	//cv::cvtColor(imageIntersections, imageIntersections, cv::COLOR_GRAY2BGR);
+	//for (int i = 0; i < mc.size(); i++)
 	//{
 	//	cv::Scalar colorRng = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-	//	drawContours(imageIntersections, contours, i, colorRng, 2, 8);
+	//	drawContours(imageIntersections, contours, i, colorRng, 10, 8);
 	//	circle(imageIntersections, mc[i], 2, cv::Scalar(0, 0, 255), -1, 8, 0);
+	//	cv::imshow("pntr", imageIntersections);
+	//	cv::waitKey(0);
 	//}
-	//cv::imshow(std::to_string(windowNo++), imageIntersections);
 
 	return mc;
 }
