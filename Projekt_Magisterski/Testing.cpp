@@ -49,7 +49,7 @@ void OnHarrisBlockSizeChange(int, void*)
 std::vector<cv::Point2f> TestGetGridLevelIntersections(cv::Mat imageGridLevel)
 {
 	cv::Mat imageGridLevelCopy;
-	cv::copyTo(imageGridLevel, imageGridLevelCopy, cv::Mat::ones(IMAGE_SIZE, CV_8U));
+	cv::copyTo(imageGridLevel, imageGridLevelCopy, cv::Mat::ones(IMAGE_FIX_SIZE, CV_8U));
 
 	int windowNo = 0;
 	if (imageGridLevelCopy.channels() > 1)
@@ -84,8 +84,8 @@ std::vector<cv::Point2f> TestGetGridLevelIntersections(cv::Mat imageGridLevel)
 	}
 
 	cv::RNG rng(12345);
-	cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_SIZE, CV_8UC3);
-	//cv::copyTo(imageGridLevelCopy, imageIntersections, cv::Mat::ones(IMAGE_SIZE, CV_8U));
+	cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_FIX_SIZE, CV_8UC3);
+	//cv::copyTo(imageGridLevelCopy, imageIntersections, cv::Mat::ones(IMAGE_FIX_SIZE, CV_8U));
 	cvtColor(imageGridLevelCopy, imageGridLevelCopy, cv::COLOR_GRAY2BGR);
 	for (int i = 0; i < mu.size(); i++)
 	{

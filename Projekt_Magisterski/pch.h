@@ -15,7 +15,7 @@
 #define DRAW_LSD FALSE
 #define RESIZE_LSD FALSE
 #define OTSU_LEVELFIX TRUE
-#define IMAGE_SIZE cv::Size(800,600)
+#define IMAGE_FIX_SIZE cv::Size(800,600)
 
 
 // TODO: add headers that you want to pre-compile here

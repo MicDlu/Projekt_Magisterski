@@ -15,7 +15,7 @@ int main()
 			cv::Mat imageInput = cv::imread(files[i]);
 			cv::Mat imageFixSize = FixImageSize(imageInput);
 			cv::Mat imageRemBkgd = RemoveBackground(imageFixSize);
-			char pageSide = CalcPageSide(imageRemBkgd);
+			RemoveOtherPage(imageRemBkgd, imageFixSize);
 			cv::Mat imagePreOtsu = OtsuPreReduceVariety(imageRemBkgd);
 			OtsuN otsu(imagePreOtsu, 3);
 			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
@@ -28,18 +28,16 @@ int main()
 
 			//TrackbarIntersectionPoints(imageLevels[1]);
 
-			//DocAreaLSD docAreaLSD(imageFixSize);
-			//std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
 
 			std::vector<cv::Point2f> intersectionPoints = GetGridLevelIntersections(imageLevels[1]);
 			cv::RNG rng(12345);
-			cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_SIZE, CV_8UC3);
-			//cv::copyTo(imageRemBkgd, imageIntersections, cv::Mat::ones(IMAGE_SIZE, CV_8U));
+			cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_FIX_SIZE, CV_8UC3);
+			cv::copyTo(imageRemBkgd, imageIntersections, cv::Mat::ones(IMAGE_FIX_SIZE, CV_8U));
 			for (int i = 0; i < intersectionPoints.size(); i++)
 			{
 				circle(imageIntersections, intersectionPoints[i], 2, cv::Scalar(0, 0, 255), -1, 8, 0);
 			}
-			cv::imshow("Intersection Points", imageRemBkgd);
+			cv::imshow("Intersection Points", imageIntersections);
 			cv::waitKey(0);
 
 			cv::destroyAllWindows();
@@ -101,6 +99,34 @@ int main()
 	return 0;
 }
 
+void RemoveOtherPage(cv::Mat &imageRemBkgd, const cv::Mat &imageFixSize)
+{
+	char pageSide = CalcPageSide(imageRemBkgd);
+	DocAreaLSD docAreaLSD(imageFixSize);
+	std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
+	std::vector<cv::Point> polyPoints;
+	if (pageSide == 'L')
+	{
+		LineExtender notebookSpine(quads[2], quads[3]);
+		cv::Vec4f spineExtend = notebookSpine.GetLineExtends(IMAGE_FIX_SIZE);
+		polyPoints.push_back(cv::Point(spineExtend[0], spineExtend[1]));
+		polyPoints.push_back(cv::Point(spineExtend[2], spineExtend[3]));
+		polyPoints.push_back(cv::Point(IMAGE_FIX_SIZE.width - 1, 0));
+		polyPoints.push_back(cv::Point(IMAGE_FIX_SIZE.width - 1, IMAGE_FIX_SIZE.height - 1));
+	}
+	else if (pageSide == 'R')
+	{
+		LineExtender notebookSpine(quads[0], quads[1]);
+		cv::Vec4f spineExtend = notebookSpine.GetLineExtends(IMAGE_FIX_SIZE);
+		polyPoints.push_back(cv::Point(spineExtend[0], spineExtend[1]));
+		polyPoints.push_back(cv::Point(spineExtend[2], spineExtend[3]));
+		polyPoints.push_back(cv::Point(0, 0));
+		polyPoints.push_back(cv::Point(0, IMAGE_FIX_SIZE.height - 1));
+	}
+	cv::fillConvexPoly(imageRemBkgd, polyPoints, cv::Scalar(0));
+	//cv::imshow("image poly removed", imageRemBkgd);
+}
+
 char CalcPageSide(cv::Mat imageBackground)
 {
 	// Convert to double type
@@ -109,6 +135,8 @@ char CalcPageSide(cv::Mat imageBackground)
 	img64.convertTo(img64, CV_64FC3);
 
 	// Calculate columns sum histogram
+	// https://stackoverflow.com/questions/12833657/column-sum-of-opencv-matrix-elements
+	// https://docs.opencv.org/2.4/modules/core/doc/operations_on_arrays.html#reduce
 	cv::Mat matHist = cv::Mat::zeros(cv::Size(img64.cols, 1), CV_64FC1);
 	cv::reduce(img64, matHist, 0, cv::REDUCE_SUM);
 
@@ -181,8 +209,8 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 	}
 
 	//cv::RNG rng(12345);
-	//cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_SIZE, CV_8UC3);
-	//cv::copyTo(imageGridLevel, imageIntersections, cv::Mat::ones(IMAGE_SIZE, CV_8U));
+	//cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_FIX_SIZE, CV_8UC3);
+	//cv::copyTo(imageGridLevel, imageIntersections, cv::Mat::ones(IMAGE_FIX_SIZE, CV_8U));
 	//for (int i = 0; i < mu.size(); i++)
 	//{
 	//	cv::Scalar colorRng = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));

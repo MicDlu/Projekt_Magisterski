@@ -35,25 +35,25 @@ void LineExtender::CalcBounds(cv::Size &imageSize)
 	float extendX1, extendX2;
 	if (a < 0) // rosn¹ca
 	{
-		if (CalcY(0) <= imageSize.height)
+		if (CalcY(0) <= imageSize.height-1)
 			extendX1 = 0;
 		else
 			extendX1 = CalcX(imageSize.height);
 		if (CalcY(imageSize.width) >= 0)
-			extendX2 = imageSize.width;
+			extendX2 = imageSize.width-1;
 		else
 			extendX2 = CalcX(0);
 	}
 	else // malej¹ca
 	{
 		if (CalcY(0) >= 0)
-			extendX1 = 0;
+			extendX2 = 0;
 		else
-			extendX1 = CalcX(0);
+			extendX2 = CalcX(0);
 		if (CalcY(imageSize.width) <= imageSize.height)
-			extendX2 = imageSize.width;
+			extendX1 = imageSize.width-1;
 		else
-			extendX2 = CalcX(imageSize.height);
+			extendX1 = CalcX(imageSize.height-1);
 	}
 	extend1 = cv::Point2f(extendX1, CalcY(extendX1));
 	extend2 = cv::Point2f(extendX2, CalcY(extendX2));

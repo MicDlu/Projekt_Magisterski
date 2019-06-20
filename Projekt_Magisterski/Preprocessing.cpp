@@ -3,7 +3,7 @@
 cv::Mat FixImageSize(cv::Mat input)
 {
 	cv::Mat output;
-	cv::resize(input, output, IMAGE_SIZE);
+	cv::resize(input, output, IMAGE_FIX_SIZE);
 	return output;
 }
 
