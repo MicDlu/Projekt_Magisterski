@@ -11,7 +11,7 @@
 #define OTSU_1 TRUE
 #define OTSU_2 TRUE
 #define HOUGH FALSE
-#define DRAW_EDGE FALSE
+#define DRAW_EDGE TRUE
 #define DRAW_LSD FALSE
 #define RESIZE_LSD FALSE
 #define OTSU_LEVELFIX TRUE

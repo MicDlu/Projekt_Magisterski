@@ -14,28 +14,32 @@ int main()
 		{
 			cv::Mat imageInput = cv::imread(files[i]);
 			cv::Mat imageFixSize = FixImageSize(imageInput);
-			cv::Mat imageExtract = RemoveBackground(imageFixSize);
-			cv::Mat imagePreOtsu = OtsuPreReduceVariety(imageExtract);
+			cv::Mat imageRemBkgd = RemoveBackground(imageFixSize);
+			char pageSide = CalcPageSide(imageRemBkgd);
+			cv::Mat imagePreOtsu = OtsuPreReduceVariety(imageRemBkgd);
 			OtsuN otsu(imagePreOtsu, 3);
 			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
 			std::vector<cv::Mat> imageLevels = otsu.ReturnImageLevels();
 			//cv::imshow("image all levels", imageLevelAll);
-			/*cv::imshow("image level 1", imageLevels[0]);
-			cv::imshow("image level 2", imageLevels[1]);
-			cv::imshow("image level 3", imageLevels[2]);
-			cv::waitKey(0);*/
+			//cv::imshow("image level 1", imageLevels[0]);
+			//cv::imshow("image level 2", imageLevels[1]);
+			//cv::imshow("image level 3", imageLevels[2]);
+			//cv::waitKey(0);
 
 			//TrackbarIntersectionPoints(imageLevels[1]);
+
+			//DocAreaLSD docAreaLSD(imageFixSize);
+			//std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
 
 			std::vector<cv::Point2f> intersectionPoints = GetGridLevelIntersections(imageLevels[1]);
 			cv::RNG rng(12345);
 			cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_SIZE, CV_8UC3);
-			//cv::copyTo(imageExtract, imageIntersections, cv::Mat::ones(IMAGE_SIZE, CV_8U));
+			//cv::copyTo(imageRemBkgd, imageIntersections, cv::Mat::ones(IMAGE_SIZE, CV_8U));
 			for (int i = 0; i < intersectionPoints.size(); i++)
 			{
 				circle(imageIntersections, intersectionPoints[i], 2, cv::Scalar(0, 0, 255), -1, 8, 0);
 			}
-			cv::imshow("Intersection Points", imageIntersections);
+			cv::imshow("Intersection Points", imageRemBkgd);
 			cv::waitKey(0);
 
 			cv::destroyAllWindows();
@@ -81,8 +85,8 @@ int main()
 		// 3- level thresholding
 		if (OTSU_2)
 		{
-			cv::Mat	imageExtract = ReduceVariety(imageWarped);
-			OtsuN otsu(imageExtract, 3);
+			cv::Mat	imageRemBkgd = ReduceVariety(imageWarped);
+			OtsuN otsu(imageRemBkgd, 3);
 			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
 			std::vector<cv::Mat> imageLevels = otsu.ReturnImageLevels();
 			//cv::imshow("image all levels", imageLevelAll);
@@ -95,6 +99,44 @@ int main()
 	}
 	*/
 	return 0;
+}
+
+char CalcPageSide(cv::Mat imageBackground)
+{
+	// Convert to double type
+	cv::Mat img64;
+	cv::cvtColor(imageBackground, img64, cv::COLOR_BGR2GRAY);
+	img64.convertTo(img64, CV_64FC3);
+
+	// Calculate columns sum histogram
+	cv::Mat matHist = cv::Mat::zeros(cv::Size(img64.cols, 1), CV_64FC1);
+	cv::reduce(img64, matHist, 0, cv::REDUCE_SUM);
+
+	// Calculate minimum value of column sum
+	cv::Mat MatHistMin;
+	cv::reduce(matHist, MatHistMin, 1, cv::REDUCE_MIN);
+	double histMin = MatHistMin.at<double>(0);
+
+	// Calculate average position of minimum value
+	int sum = 0;
+	int count = 0;
+	for (int i = 0; i < matHist.cols; i++)
+	{
+		if (matHist.at<double>(i) == histMin)
+		{
+			sum += i;
+			count += 1;
+		}
+	}
+
+	// Return result
+	//if (count == 0)
+	//	return '?';
+	double histMinPosAvg = sum / count;
+	if (histMinPosAvg < img64.cols / 2)
+		return 'L';
+	else
+		return 'R';
 }
 
 
