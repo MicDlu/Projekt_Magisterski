@@ -40,17 +40,17 @@ int main()
 			PointLines pointLines(intersectionPoints);
 
 			/////////////
-			for (int i = 0; i < intersectionPoints.size(); i++)
-			{
-				cv::Mat test = imageIntersections.clone();			
-				cv::Point2f lookPnt = intersectionPoints[i];
-				cv::Point2f nearestPnt = GetNearestPointIdx(intersectionPoints, lookPnt);
-				cv::line(test, lookPnt, nearestPnt, cv::Scalar(255, 255, 0));
-				circle(test, lookPnt, 5, cv::Scalar(0, 255, 0), 2);
-				circle(test, nearestPnt, 5, cv::Scalar(255, 0, 0), 2);
-				cv::imshow("test", test);
-				cv::waitKey(0);
-			}
+			//for (int i = 0; i < intersectionPoints.size(); i++)
+			//{
+			//	cv::Mat test = imageIntersections.clone();			
+			//	cv::Point2f lookPnt = intersectionPoints[i];
+			//	cv::Point2f nearestPnt = GetNearestPointIdx(intersectionPoints, lookPnt);
+			//	cv::line(test, lookPnt, nearestPnt, cv::Scalar(255, 255, 0));
+			//	circle(test, lookPnt, 5, cv::Scalar(0, 255, 0), 2);
+			//	circle(test, nearestPnt, 5, cv::Scalar(255, 0, 0), 2);
+			//	cv::imshow("test", test);
+			//	cv::waitKey(0);
+			//}
 			/////////////
 			cv::imshow("Intersection Points", imageIntersections);
 			cv::waitKey(0);

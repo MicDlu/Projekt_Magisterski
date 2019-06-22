@@ -9,10 +9,10 @@ private:
 	std::vector<cv::Point2f> points;
 	float avgDist;
 	float GetAvgDist();
-	int GetNearestPointIdx(std::vector<cv::Point2f> &remainPts, cv::Point2f & pnt, int xShift=0, int yShift=0);
+	int GetNearestPointIdx(std::vector<cv::Point2f> &remainPts, cv::Point2f & pnt);
 	float GetPointsDistance(cv::Point2f & pnt1, cv::Point2f & pnt2);
 	float GetLineSegmentAngle(cv::Point2f & pnt1, cv::Point2f & pnt2);
-	cv::Point2f GetShift(cv::Point2f & pnt1, cv::Point2f & pnt2, float & dist, float & prevAngle);
+	cv::Point2f CalcShift(cv::Point2f & pnt1, cv::Point2f & pnt2, float & dist, std::vector<float> &prevAngles);
 	bool FitsInImage(cv::Point2f & point);
 };
 

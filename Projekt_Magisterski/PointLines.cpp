@@ -13,56 +13,90 @@ PointLines::PointLines(std::vector<cv::Point2f> points)
 std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines(std::vector<cv::Point2f> points)
 {
 	std::vector<std::vector<cv::Point2f>> verticalLines;
-	cv::Point2f zeroPnt(0, 0);
-	//
+	cv::Point2f lineInitPnt(0, 0);
+	std::vector<float> angleHist;
+	cv::RNG rng(12345);
+
+	// Visualization main matrice
 	cv::Mat test = cv::Mat::zeros(IMAGE_FIX_SIZE, CV_8UC3);
 	for (int i = 0; i < points.size(); i++)
 		circle(test, points[i], 2, cv::Scalar(0, 0, 255), -1);
-	//
-	cv::RNG rng(12345);
+	
+	// Unitil there are points...
 	while (!points.empty())
 	{
+		// init line vector and visualization secondary matrice
 		cv::Mat test2 = test.clone();
 		cv::Scalar colorRng = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
 		std::vector<cv::Point2f> verticalLine;
+
 		// Calc init line point
-		int currPntIdx = GetNearestPointIdx(points,zeroPnt);
+		int currPntIdx = GetNearestPointIdx(points,lineInitPnt);
+
+		// Break condition - no more lines prediction
+		if (GetLineSegmentAngle(lineInitPnt, points[currPntIdx]) > 0)
+			break;
+
+		// Transfer point to line vector
 		verticalLine.push_back(points[currPntIdx]);
 		points.erase(points.begin() + currPntIdx);
 
-		cv::line(test2, zeroPnt, verticalLine.back(), cv::Scalar(255, 0, 0));
+		// Init searching point and shift
+		cv::Point2f searchPnt = verticalLine.back();
+		cv::Point2f shift(0, avgDist);
+
+		// Angle history init management
+		if (angleHist.empty())
+			angleHist.push_back(90);
+		else if (angleHist.size() > 10)		
+			angleHist = std::vector<float>(angleHist.begin() + 5, angleHist.begin() + 10);
+		else
+			angleHist.resize(5);
+
+		// Visualization
+		cv::line(test2, lineInitPnt, verticalLine.back(), cv::Scalar(255, 0, 0));
 		circle(test, verticalLine.back(), 2, colorRng, 2);
 		circle(test2, verticalLine.back(), 2, colorRng, 2);
-		cv::Point2f searchPnt = verticalLine.back();
-		float angle = -90;
-		cv::Point2f shift(0, avgDist);
-		// Calc other points
-		while (FitsInImage(searchPnt))
-		{
-			currPntIdx = GetNearestPointIdx(points,searchPnt, shift.x, shift.y);
-			circle(test2, points[currPntIdx], 1, cv::Scalar(0, 255, 255), 2);
-			cv::line(test2, searchPnt, searchPnt + shift, colorRng,2);
-			searchPnt += shift;
-			cv::imshow("test", test2);
-			cv::waitKey(0);
+		cv::imshow("test", test2);
+		cv::waitKey(0);
 
-			if (GetPointsDistance(points[currPntIdx], searchPnt) > (avgDist / 2))
-			{
+		// Calc rest of line
+		while (FitsInImage(searchPnt) && !points.empty())
+		{
+			searchPnt += shift;
+			currPntIdx = GetNearestPointIdx(points,searchPnt);
+
+			// Visualization
+			cv::line(test2, searchPnt, searchPnt - shift, colorRng,2);
+			circle(test2, points[currPntIdx], 1, cv::Scalar(0, 255, 255), 2);
+			//cv::imshow("test", test2);
+			//cv::waitKey(0);
+
+			// Skip if no point near searching point
+			if (GetPointsDistance(points[currPntIdx], searchPnt) > (avgDist / 2))			
 				continue;
-			}
+
+			// Transfer point to line vector
 			verticalLine.push_back(points[currPntIdx]);
 			points.erase(points.begin() + currPntIdx);
-			shift = GetShift(verticalLine[verticalLine.size() - 2], verticalLine[verticalLine.size() - 1], avgDist, angle);
-			searchPnt = verticalLine.back();
 
+			// Visualization
 			circle(test, verticalLine.back(), 2, colorRng, 2);
 			circle(test2, verticalLine.back(), 2, colorRng, 2);
 			//cv::imshow("test", test2);
 			//cv::waitKey(0);
+
+			// Calc searching point and shift
+			searchPnt = verticalLine.back();
+			shift = CalcShift(verticalLine[verticalLine.size() - 2], verticalLine[verticalLine.size() - 1], avgDist, angleHist);
 		}
 
+		// Calc next line init point
+		lineInitPnt = cv::Point2f(verticalLine.front().x + avgDist, verticalLine.front().y - avgDist);
 		verticalLines.push_back(verticalLine);
 	}
+	cv::imshow("test", test);
+	cv::waitKey(0);
 
 	return verticalLines;
 }
@@ -107,17 +141,17 @@ float PointLines::GetAvgDist()
 	return distSum / pntCount;
 }
 
-int PointLines::GetNearestPointIdx(std::vector<cv::Point2f> &remainPts,cv::Point2f &pnt, int xShift, int yShift)
+int PointLines::GetNearestPointIdx(std::vector<cv::Point2f> &remainPts,cv::Point2f &pnt)
 {
 	// https://stackoverflow.com/questions/9825959/find-closest-neighbors-opencv
 	cv::flann::KDTreeIndexParams indexParams;
 	cv::flann::Index kdtree(cv::Mat(remainPts).reshape(1), indexParams);
 	std::vector<float> query;
-	query.push_back(pnt.x + xShift);
-	query.push_back(pnt.y + yShift);
+	query.push_back(pnt.x);
+	query.push_back(pnt.y);
 	std::vector<int> indices;
 	std::vector<float> dists;
-	kdtree.knnSearch(query, indices, dists, 2);
+	kdtree.knnSearch(query, indices, dists, 1);
 	// Reject entry point
 	for (int i = 0; i < 2; i++)
 		if (remainPts[indices[i]] != pnt)
@@ -130,22 +164,24 @@ float PointLines::GetPointsDistance(cv::Point2f &pnt1, cv::Point2f &pnt2)
 	return cv::sqrt(diff.x*diff.x + diff.y*diff.y);
 }
 
-//float PointLines::GetLineSegmentAngle(cv::Point2f &pnt1, cv::Point2f &pnt2)
-//{
-//	cv::Point2f diff = pnt2 - pnt1;
-//	float a = (diff.y) / (diff.x);
-//	return atan(a) * RAD2DEG;
-//}
+float PointLines::GetLineSegmentAngle(cv::Point2f &pnt1, cv::Point2f &pnt2)
+{
+	float a = (pnt2.y - pnt1.y) / (pnt2.x - pnt1.x);
+	return atan(-a) * 180.0 / CV_PI;
+}
 
-cv::Point2f PointLines::GetShift(cv::Point2f &pnt1, cv::Point2f &pnt2, float &dist, float &prevAngle)
+cv::Point2f PointLines::CalcShift(cv::Point2f &pnt1, cv::Point2f &pnt2, float &dist, std::vector<float> &prevAngles)
 {
 	float a = (pnt2.y - pnt1.y) / (pnt2.x - pnt1.x);
 	float b = pnt1.y - a * pnt1.x;
-	float currAngle = atan(a) * 180.0 / CV_PI;
-	float avgAngle = (currAngle + prevAngle) / 2;
-	prevAngle = currAngle;
+	float currAngle = abs(atan(-a)) * 180.0 / CV_PI;
+	float avgAngle = std::accumulate(prevAngles.begin(), prevAngles.end(), 0.0) / prevAngles.size();
+	if (abs(currAngle - avgAngle) < 10)
+		prevAngles.push_back(currAngle);
+	else
+		int a = 1;
 	float xShift = -dist * cos(avgAngle /180.0 * CV_PI);
-	float yShift = -dist * sin(avgAngle /180.0 * CV_PI);
+	float yShift = dist * sin(avgAngle /180.0 * CV_PI);
 	return cv::Point2f(xShift, yShift);
 }
 

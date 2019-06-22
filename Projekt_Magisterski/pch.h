@@ -21,6 +21,7 @@
 // TODO: add headers that you want to pre-compile here
 
 #include <iostream>
+#include <numeric>
 #include <math.h>
 #include <windows.h>
 #include <opencv2/core.hpp>
