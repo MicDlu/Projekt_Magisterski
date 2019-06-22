@@ -34,16 +34,18 @@ int main()
 			cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_FIX_SIZE, CV_8UC3);
 			cv::copyTo(imageRemBkgd, imageIntersections, cv::Mat::ones(IMAGE_FIX_SIZE, CV_8U));
 			for (int i = 0; i < intersectionPoints.size(); i++)
-			{
 				circle(imageIntersections, intersectionPoints[i], 2, cv::Scalar(0, 0, 255), -1);
-			}
+			/////////////
+
+			PointLines pointLines(intersectionPoints);
 
 			/////////////
 			for (int i = 0; i < intersectionPoints.size(); i++)
 			{
 				cv::Mat test = imageIntersections.clone();			
 				cv::Point2f lookPnt = intersectionPoints[i];
-				cv::Point2f nearestPnt = FindNearestPoint(intersectionPoints, lookPnt);
+				cv::Point2f nearestPnt = GetNearestPointIdx(intersectionPoints, lookPnt);
+				cv::line(test, lookPnt, nearestPnt, cv::Scalar(255, 255, 0));
 				circle(test, lookPnt, 5, cv::Scalar(0, 255, 0), 2);
 				circle(test, nearestPnt, 5, cv::Scalar(255, 0, 0), 2);
 				cv::imshow("test", test);
@@ -112,7 +114,7 @@ int main()
 	return 0;
 }
 
-cv::Point2f FindNearestPoint(std::vector<cv::Point2f> &intersectionPoints, cv::Point2f &pnt)
+cv::Point2f GetNearestPointIdx(std::vector<cv::Point2f> &intersectionPoints, cv::Point2f &pnt)
 {
 	// https://stackoverflow.com/questions/9825959/find-closest-neighbors-opencv
 	cv::flann::KDTreeIndexParams indexParams;

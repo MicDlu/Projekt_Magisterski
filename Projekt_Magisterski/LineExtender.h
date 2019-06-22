@@ -15,7 +15,6 @@ private:
 	float a, b;
 	cv::Point2f extend1, extend2;
 	cv::Mat image;
-	const float rad2deg = 180 / CV_PI;
 	float CalcY(float x);
 	float CalcX(float y);
 	void CalcBounds(cv::Size & imageSize);

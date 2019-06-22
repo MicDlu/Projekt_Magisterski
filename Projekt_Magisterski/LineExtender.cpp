@@ -69,7 +69,7 @@ float LineExtender::GetIntersectionAngle(LineExtender line)
 {
 	float tgA = abs((a - line.a) / (1 + a * line.a));
 	float radianA = atan(tgA);
-	return radianA * rad2deg;
+	return radianA * RAD2DEG;
 }
 
 cv::Point2f LineExtender::GetIntersectionPoint(LineExtender line)
@@ -89,5 +89,5 @@ bool LineExtender::FitsInImage(cv::Point2f point, cv::Size imageSize)
 
 float LineExtender::GetOxAngle()
 {
-	return atan(a) * rad2deg;
+	return atan(a) * RAD2DEG;
 }

@@ -2,7 +2,7 @@
 
 int main();
 
-cv::Point2f FindNearestPoint(std::vector<cv::Point2f> &intersectionPoints, cv::Point2f &pnt);
+cv::Point2f GetNearestPointIdx(std::vector<cv::Point2f> &intersectionPoints, cv::Point2f &pnt);
 
 void RemoveOtherPage(cv::Mat &imageRemBkgd, const cv::Mat &imageFixSize);
 

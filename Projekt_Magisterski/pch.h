@@ -16,7 +16,7 @@
 #define RESIZE_LSD FALSE
 #define OTSU_LEVELFIX TRUE
 #define IMAGE_FIX_SIZE cv::Size(800,600)
-
+#define RAD2DEG 180.0 / CV_PI
 
 // TODO: add headers that you want to pre-compile here
 
@@ -34,5 +34,6 @@
 #include "DocAreaLSD.h"
 #include "OtsuN.h"
 #include "Testing.h"
+#include "PointLines.h"
 
 #endif //PCH_H

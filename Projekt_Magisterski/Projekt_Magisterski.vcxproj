@@ -166,6 +166,7 @@
     <ClInclude Include="LineExtender.h" />
     <ClInclude Include="OtsuN.h" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="PointLines.h" />
     <ClInclude Include="Preprocessing.h" />
     <ClInclude Include="Projekt_Magisterski.h" />
     <ClInclude Include="Testing.h" />
@@ -180,6 +181,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="PointLines.cpp" />
     <ClCompile Include="Preprocessing.cpp" />
     <ClCompile Include="Projekt_Magisterski.cpp" />
     <ClCompile Include="Testing.cpp" />
