@@ -35,6 +35,8 @@ int main()
 			cv::copyTo(imageRemBkgd, imageIntersections, cv::Mat::ones(IMAGE_FIX_SIZE, CV_8U));
 			for (int i = 0; i < intersectionPoints.size(); i++)
 				circle(imageIntersections, intersectionPoints[i], 2, cv::Scalar(0, 0, 255), -1);
+			//cv::imshow("imageIntersections", imageIntersections);
+			//cv::waitKey(0);
 			/////////////
 
 			PointLines pointLines(intersectionPoints);
@@ -225,34 +227,59 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 	cv::threshold(imageHarris, imageHarris, 0.01, 1, cv::ThresholdTypes::THRESH_BINARY);
 	//cv::imshow(std::to_string(windowNo++), imageHarris);
 
-	// Calculate centers of contours
+	// Calculate contours
 	// https://www.pyimagesearch.com/2016/02/01/opencv-center-of-contour/
 	// https://docs.opencv.org/2.4/doc/tutorials/imgproc/shapedescriptors/moments/moments.html
 	imageHarris.convertTo(imageHarris, CV_8U, 255);
 	std::vector<std::vector<cv::Point>> contours;
 	cv::findContours(imageHarris, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
-	cv::Mat imageCont = cv::Mat::zeros(imageGridLevel.size(), CV_8U);
-	cv::Moments mu;
+
+	// Calc average contour rectangle boundary size
+	cv::Size avgRectSize = cv::Size(0, 0);
+	for (int i = 0; i < contours.size(); i++)
+	{
+		avgRectSize += cv::boundingRect(contours[i]).size();
+	}
+	avgRectSize.width /= contours.size();
+	avgRectSize.height /= contours.size();
+
+	// Reject invalid contours and calculate centers
+#define REJECT_FACTOR 3
 	std::vector<cv::Point2f> mc;
 	for (int i = 0; i < contours.size(); i++)
 	{
-		mu = moments(contours[i], true);
-		if (mu.m00 != 0)
-			mc.push_back(cv::Point2f(mu.m10 / mu.m00, mu.m01 / mu.m00));
+		cv::Rect contourRect = cv::boundingRect(contours[i]);
+		if ((contourRect.width <= (REJECT_FACTOR * avgRectSize.width)) && (contourRect.height <= (REJECT_FACTOR * avgRectSize.height))) {
+			cv::Moments mu = moments(contours[i], true);
+			if (mu.m00 != 0)
+			{
+				mc.push_back(cv::Point2f(mu.m10 / mu.m00, mu.m01 / mu.m00));
+			}
+		}
 	}
 
+	// Visualize
 	//cv::RNG rng(12345);
-	//cv::Mat imageIntersections = cv::Mat::zeros(IMAGE_FIX_SIZE, CV_8UC3);
-	//cv::copyTo(imageGridLevel, imageIntersections, cv::Mat::ones(IMAGE_FIX_SIZE, CV_8U));
-	//cv::cvtColor(imageIntersections, imageIntersections, cv::COLOR_GRAY2BGR);
-	//for (int i = 0; i < mc.size(); i++)
-	//{
-	//	cv::Scalar colorRng = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-	//	drawContours(imageIntersections, contours, i, colorRng, 10, 8);
-	//	circle(imageIntersections, mc[i], 2, cv::Scalar(0, 0, 255), -1, 8, 0);
-	//	cv::imshow("pntr", imageIntersections);
-	//	cv::waitKey(0);
-	//}
+	cv::Mat imageIntersections = imageGridLevel.clone();
+	cv::cvtColor(imageIntersections, imageIntersections, cv::COLOR_GRAY2BGR);
+	// Visualize contours
+	for (int i = 0; i < contours.size(); i++)
+	{
+		cv::Scalar colorRng;// = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+		cv::Rect contourRect = cv::boundingRect(contours[i]);
+		if ((contourRect.width <= (REJECT_FACTOR * avgRectSize.width)) && (contourRect.height <= (REJECT_FACTOR * avgRectSize.height)))
+			colorRng = cv::Scalar(200, 0, 0);
+		else
+			colorRng = cv::Scalar(0, 0, 255);
+		drawContours(imageIntersections, contours, i, colorRng, 3, 8);
+	}
+	// Visualize points
+	for (int i = 0; i < mc.size(); i++)
+	{
+		circle(imageIntersections, mc[i], 0, cv::Scalar(0, 255, 0), 2);
+	}
+	cv::imshow("Contours and centers", imageIntersections);
+	cv::waitKey(0);
 
 	return mc;
 }
