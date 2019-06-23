@@ -34,8 +34,9 @@ std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines(std::vector<c
 		int currPntIdx = GetNearestPointIdx(points,lineInitPnt);
 
 		// Break condition - no more lines prediction
-		if (GetLineSegmentAngle(lineInitPnt, points[currPntIdx]) > 0)
-			break;
+		if (!verticalLines.empty())
+			if (points[currPntIdx].x < verticalLines.back().front().x)
+				break;
 
 		// Transfer point to line vector
 		verticalLine.push_back(points[currPntIdx]);
