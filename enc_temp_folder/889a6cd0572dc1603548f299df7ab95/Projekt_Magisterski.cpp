@@ -269,7 +269,7 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 		cv::Rect contourRect = cv::boundingRect(contours[i]);
 		if ((contourRect.width <= (REJECT_FACTOR * avgRectSize.width)) && (contourRect.height <= (REJECT_FACTOR * avgRectSize.height)))
 			colorRng = cv::Scalar(200, 0, 0);
-		else// if ((contourRect.width > avgRectSize.width) && (contourRect.height > avgRectSize.height))
+		else
 			colorRng = cv::Scalar(0, 0, 255);
 		drawContours(imageIntersections, contours, i, colorRng, 3, 8);
 	}
