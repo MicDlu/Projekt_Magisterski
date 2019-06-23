@@ -23,7 +23,7 @@ std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines(std::vector<c
 		circle(test, points[i], 2, cv::Scalar(0, 0, 255), -1);
 	
 	// Unitil there are points...
-	while (!points.empty())
+	while (!points.empty() && FitsInImage(lineInitPnt))
 	{
 		// init line vector and visualization secondary matrice
 		cv::Mat test2 = test.clone();
@@ -36,7 +36,10 @@ std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines(std::vector<c
 		// Break condition - no more lines prediction
 		if (!verticalLines.empty())
 			if (points[currPntIdx].x < verticalLines.back().front().x)
-				break;
+			{
+				lineInitPnt.x += avgDist;
+				continue;
+			}
 
 		// Transfer point to line vector
 		verticalLine.push_back(points[currPntIdx]);
