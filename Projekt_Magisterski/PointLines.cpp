@@ -2,16 +2,18 @@
 #include "PointLines.h"
 
 
-PointLines::PointLines(std::vector<cv::Point2f> points)
+PointLines::PointLines(std::vector<cv::Point2f> points, std::vector<cv::Point> quads)
 {
 	this->points = points;
 	this->avgDist = GetAvgDist();
-
-	GetVerticalLines(points);
+	cv::Point2f quadTopLeft = cv::Point2f(quads[0].x, quads[0].y);
+	cv::Point2f quadBotLeft = cv::Point2f(quads[1].x, quads[1].y);
+	this->leftBoundAngle = GetLineAngle(quadTopLeft, quadBotLeft);
 }
 
-std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines(std::vector<cv::Point2f> points)
+std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines()
 {
+	std::vector<cv::Point2f> points = this->points;
 	std::vector<std::vector<cv::Point2f>> verticalLines;
 	cv::Point2f lineInitPnt(0, 0);
 	std::vector<float> angleHist;
@@ -44,25 +46,24 @@ std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines(std::vector<c
 		// Transfer point to line vector
 		verticalLine.push_back(points[currPntIdx]);
 		points.erase(points.begin() + currPntIdx);
-
-		// Init searching point and shift
-		cv::Point2f searchPnt = verticalLine.back();
-		cv::Point2f shift(0, avgDist);
-
 		// Angle history init management
 		if (angleHist.empty())
-			angleHist.push_back(90);
+			angleHist.push_back(leftBoundAngle);
 		else if (angleHist.size() > 10)		
 			angleHist = std::vector<float>(angleHist.begin() + 5, angleHist.begin() + 10);
 		else
 			angleHist.resize(5);
 
+		// Init searching point and shift
+		cv::Point2f searchPnt = verticalLine.back();
+		cv::Point2f shift = shift = PredictShift(avgDist, angleHist);
+
 		// Visualization
 		cv::line(test2, lineInitPnt, verticalLine.back(), cv::Scalar(255, 0, 0));
 		circle(test, verticalLine.back(), 2, colorRng, 2);
 		circle(test2, verticalLine.back(), 2, colorRng, 2);
-		cv::imshow("test", test2);
-		cv::waitKey(0);
+		//cv::imshow("test", test2);
+		//cv::waitKey(0);
 
 		// Calc rest of line
 		while (FitsInImage(searchPnt) && !points.empty())
@@ -92,7 +93,11 @@ std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines(std::vector<c
 
 			// Calc searching point and shift
 			searchPnt = verticalLine.back();
-			shift = CalcShift(verticalLine[verticalLine.size() - 2], verticalLine[verticalLine.size() - 1], avgDist, angleHist);
+			float currAngle = abs(GetLineAngle(verticalLine[verticalLine.size() - 2], verticalLine[verticalLine.size() - 1]));
+			float avgAngle = std::accumulate(angleHist.begin(), angleHist.end(), 0.0) / angleHist.size();
+			if (abs(currAngle - avgAngle) < 10)
+				angleHist.push_back(currAngle);
+			shift = PredictShift(avgDist, angleHist);
 		}
 
 		// Calc next line init point
@@ -168,25 +173,23 @@ float PointLines::GetPointsDistance(cv::Point2f &pnt1, cv::Point2f &pnt2)
 	return cv::sqrt(diff.x*diff.x + diff.y*diff.y);
 }
 
-float PointLines::GetLineSegmentAngle(cv::Point2f &pnt1, cv::Point2f &pnt2)
+float PointLines::GetLineAngle(cv::Point2f &pnt1, cv::Point2f &pnt2)
 {
 	float a = (pnt2.y - pnt1.y) / (pnt2.x - pnt1.x);
 	return atan(-a) * 180.0 / CV_PI;
 }
 
-cv::Point2f PointLines::CalcShift(cv::Point2f &pnt1, cv::Point2f &pnt2, float &dist, std::vector<float> &prevAngles)
+cv::Point2f PointLines::PredictShift(float &dist, std::vector<float> &prevAngles)
 {
-	float a = (pnt2.y - pnt1.y) / (pnt2.x - pnt1.x);
-	float b = pnt1.y - a * pnt1.x;
-	float currAngle = abs(atan(-a)) * 180.0 / CV_PI;
-	float avgAngle = std::accumulate(prevAngles.begin(), prevAngles.end(), 0.0) / prevAngles.size();
-	if (abs(currAngle - avgAngle) < 10)
-		prevAngles.push_back(currAngle);
-	else
-		int a = 1;
+	float avgAngle = GetAvgShiftAngle(prevAngles);
 	float xShift = -dist * cos(avgAngle /180.0 * CV_PI);
 	float yShift = dist * sin(avgAngle /180.0 * CV_PI);
 	return cv::Point2f(xShift, yShift);
+}
+
+float PointLines::GetAvgShiftAngle(std::vector<float> &prevShiftAngles)
+{
+	return std::accumulate(prevShiftAngles.begin(), prevShiftAngles.end(), 0.0) / prevShiftAngles.size();
 }
 
 bool PointLines::FitsInImage(cv::Point2f &point)
