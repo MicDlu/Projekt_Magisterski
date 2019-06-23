@@ -10,7 +10,7 @@ int main()
 	
 	// OTSU 3 LEVEL PAPER THRESHOLDING
 	if (OTSU_1)
-		for (int i = 0; i < files.size(); i++)
+		for (int i = 1; i < files.size(); i++)
 		{
 			cv::Mat imageInput = cv::imread(files[i]);
 			cv::Mat imageFixSize = FixImageSize(imageInput);
@@ -200,7 +200,7 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 	int harrisBlock = 3;
 	int harrisKSize = 3;
 	int harrisK = 0.05; // whatever
-	int erodeSize = 5;
+	int erodeSize = 4;
 
 	int windowNo = 0;
 	if (imageGridLevel.channels() > 1)
@@ -245,7 +245,7 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 			cv::Moments mu = moments(contours[i], true);
 			if (mu.m00 != 0)
 				mc.push_back(cv::Point2f(mu.m10 / mu.m00, mu.m01 / mu.m00));
-			else// if ((contourRect.width > avgRectSize.width) && (contourRect.height > avgRectSize.height))
+			else if ((contourRect.width > avgRectSize.width) && (contourRect.height > avgRectSize.height))
 				mc.push_back(cv::Point2f(contourRect.x + contourRect.width / 2, contourRect.y + contourRect.height / 2));
 		}
 	}

@@ -14,7 +14,7 @@ private:
 	float GetPointsDistance(cv::Point2f & pnt1, cv::Point2f & pnt2);
 	float GetLineAngle(cv::Point2f & pnt1, cv::Point2f & pnt2);
 	cv::Point2f PredictShift(float & dist, std::vector<float> &prevAngles);
-	float GetAvgShiftAngle(std::vector<float>& prevShiftAngles);
+	float GetAvgShiftAngle(std::vector<float> prevShiftAngles);
 	bool FitsInImage(cv::Point2f & point);
 };
 
