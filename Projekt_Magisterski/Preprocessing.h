@@ -8,8 +8,10 @@ std::vector<cv::String> GetFiles();
 
 std::vector<cv::String> GetFiles2();
 
-cv::Mat RemoveBackground(cv::Mat image);
-
 cv::Mat ReduceVariety(cv::Mat image);
 
 cv::Mat OtsuPreReduceVariety(cv::Mat image);
+
+cv::Mat CropPage(cv::Mat imageBGR, char pageSide, std::vector<cv::Point> quads);
+
+cv::Mat GetBackgroundMask(cv::Mat image);

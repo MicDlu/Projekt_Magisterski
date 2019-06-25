@@ -2,9 +2,11 @@
 
 int main();
 
+void OldCode_DrawingAndPerspectiveTransform();
+
 cv::Point2f GetNearestPointIdx(std::vector<cv::Point2f> &intersectionPoints, cv::Point2f &pnt);
 
-void RemoveOtherPage(cv::Mat &imageRemBkgd, const cv::Mat &imageFixSize);
+cv::Mat RemoveOtherPage(cv::Mat image, char pageSide, std::vector<cv::Point> quads);
 
 char CalcPageSide(cv::Mat imageBackground);
 

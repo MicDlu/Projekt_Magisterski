@@ -15,104 +15,112 @@ int main()
 		{
 			cv::Mat imageInput = cv::imread(files[i]);
 			cv::Mat imageFixSize = FixImageSize(imageInput);
+			// Calc quad
 			DocAreaLSD docAreaLSD(imageFixSize);
 			std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
-			cv::Mat imageRemBkgd = RemoveBackground(imageFixSize);
-			RemoveOtherPage(imageRemBkgd, imageFixSize);
-			cv::Mat imagePreOtsu = OtsuPreReduceVariety(imageRemBkgd);
+			// Crop to page			
+			cv::Mat bkgdMask = GetBackgroundMask(imageFixSize);
+			char pageSide = CalcPageSide(bkgdMask);
+			cv::Mat imagePage = CropPage(imageFixSize, pageSide, quads);
+			// Thresholding
+			cv::Mat imagePreOtsu = OtsuPreReduceVariety(imagePage);
 			OtsuN otsu(imagePreOtsu, 3);
 			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
 			std::vector<cv::Mat> imageLevels = otsu.ReturnImageLevels();
+			cv::imshow("image no background", imagePreOtsu);
+			//cv::imshow("image all levels", imageLevelAll);
+			//cv::imshow("image level 1", imageLevels[0]);
+			//cv::imshow("image level 2", imageLevels[1]);
+			//cv::imshow("image level 3", imageLevels[2]);
+			cv::waitKey(0);
 
-			cv::imshow("image no background", imageRemBkgd);
-			cv::imshow("image all levels", imageLevelAll);
-			cv::imshow("image level 1", imageLevels[0]);
-			cv::imshow("image level 2", imageLevels[1]);
-			cv::imshow("image level 3", imageLevels[2]);
-			//cv::waitKey(0);
-
-			//TrackbarIntersectionPoints(imageLevels[1]);
-
-			/////////////
+			// Intersection points
 			std::vector<cv::Point2f> intersectionPoints = GetGridLevelIntersections(imageLevels[1]);
 
-			//PointLines pointLines(intersectionPoints,quads);
-			//cv::RNG rng(12345);
-			cv::Mat imageIntersections = imageRemBkgd.clone();
+			// Draw points
+			cv::Mat imageIntersectPoints = imagePage.clone();
 			for (int i = 0; i < intersectionPoints.size(); i++)
 			{
-				circle(imageIntersections, intersectionPoints[i], 0, cv::Scalar(0,0,255), 4);
+				circle(imageIntersectPoints, intersectionPoints[i], 0, cv::Scalar(0,0,255), 4);
 			}
+			cv::imshow("imageIntersections", imageIntersectPoints);
+
+			// Draw lines
+			//PointLines pointLines(intersectionPoints,quads);
 			//std::vector<std::vector<cv::Point2f>> vertLines = pointLines.GetVerticalLines();
+			//cv::RNG rng(12345);
+			//cv::Mat imageIntersectLines = imagePage.clone();
 			//for (int i = 0; i < vertLines.size(); i++)
 			//{
 			//	cv::Scalar colorRng = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
 			//	for (int j = 0; j < vertLines[i].size(); j++)
 			//	{
-			//		circle(imageIntersections, vertLines[i][j], 0, colorRng, 5);
+			//		circle(imageIntersectLines, vertLines[i][j], 0, colorRng, 5);
 			//	}
 			//}
-			cv::imshow("imageIntersections", imageIntersections);
+			//cv::imshow("Intersections lines", imageIntersectLines);
 			cv::waitKey(0);
-			/////////////
-
 			cv::destroyAllWindows();
 		}
 
-	// Temporary deprecated
-	/*
-	//std::vector<cv::String> files = GetFiles();
-	for (int i = 0; i < files.size(); i++)
-	{
-		cv::Mat imageInput = cv::imread(files[i]);
-		cv::Mat imageFixSize = FixImageSize(imageInput);
-
-		DocAreaLSD docAreaLSD(imageFixSize);
-		std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
-
-		// DRAW  EDGE POINTS
-		if (DRAW_EDGE)
-		{
-			for (int q = 0; q < 4; q++)
-				cv::circle(imageFixSize, quads[q], 10, cv::Scalar(150, 150, 0), 5);
-			cv::imshow("edges", imageFixSize);
-			cv::waitKey(0);
-		}
-
-		// PERSPECTIVE TRANSFORM
-		std::vector<cv::Point2f> quadSource;
-		for (int q = 0; q < 4; q++)
-			quadSource.push_back(cv::Point2f(quads[q].x, quads[q].y));
-
-		std::vector<cv::Point2f> quadDestination;
-		quadDestination.push_back(cv::Point2f(0, 0));
-		quadDestination.push_back(cv::Point2f(0, imageFixSize.size().height));
-		quadDestination.push_back(cv::Point2f(imageFixSize.size().width, imageFixSize.size().height));
-		quadDestination.push_back(cv::Point2f(imageFixSize.size().width, 0));
-
-		cv::Mat transform = cv::getPerspectiveTransform(quadSource, quadDestination);
-		cv::Mat imageWarped;
-		cv::warpPerspective(imageFixSize, imageWarped, transform, imageFixSize.size());
-		cv::imshow("warped", imageWarped);
-		cv::waitKey(0);
-
-		// 3- level thresholding
-		if (OTSU_2)
-		{
-			cv::Mat	imageRemBkgd = ReduceVariety(imageWarped);
-			OtsuN otsu(imageRemBkgd, 3);
-			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
-			std::vector<cv::Mat> imageLevels = otsu.ReturnImageLevels();
-			//cv::imshow("image all levels", imageLevelAll);
-			//cv::imshow("image level 1", imageLevels[0]);
-			//cv::imshow("image level 2", imageLevels[1]);
-			//cv::imshow("image level 3", imageLevels[2]);
-			//cv::waitKey(0);
-			//cv::destroyAllWindows();
-		}
-	}
-	*/
 	return 0;
+}
+
+void OldCode_DrawingAndPerspectiveTransform()
+{
+	// Temporary deprecated
+/*
+//std::vector<cv::String> files = GetFiles();
+for (int i = 0; i < files.size(); i++)
+{
+	cv::Mat imageInput = cv::imread(files[i]);
+	cv::Mat imageFixSize = FixImageSize(imageInput);
+
+	DocAreaLSD docAreaLSD(imageFixSize);
+	std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
+
+	// DRAW  EDGE POINTS
+	if (DRAW_EDGE)
+	{
+		for (int q = 0; q < 4; q++)
+			cv::circle(imageFixSize, quads[q], 10, cv::Scalar(150, 150, 0), 5);
+		cv::imshow("edges", imageFixSize);
+		cv::waitKey(0);
+	}
+
+	// PERSPECTIVE TRANSFORM
+	std::vector<cv::Point2f> quadSource;
+	for (int q = 0; q < 4; q++)
+		quadSource.push_back(cv::Point2f(quads[q].x, quads[q].y));
+
+	std::vector<cv::Point2f> quadDestination;
+	quadDestination.push_back(cv::Point2f(0, 0));
+	quadDestination.push_back(cv::Point2f(0, imageFixSize.size().height));
+	quadDestination.push_back(cv::Point2f(imageFixSize.size().width, imageFixSize.size().height));
+	quadDestination.push_back(cv::Point2f(imageFixSize.size().width, 0));
+
+	cv::Mat transform = cv::getPerspectiveTransform(quadSource, quadDestination);
+	cv::Mat imageWarped;
+	cv::warpPerspective(imageFixSize, imageWarped, transform, imageFixSize.size());
+	cv::imshow("warped", imageWarped);
+	cv::waitKey(0);
+
+	// 3- level thresholding
+	if (OTSU_2)
+	{
+		cv::Mat	image = ReduceVariety(imageWarped);
+		OtsuN otsu(image, 3);
+		cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
+		std::vector<cv::Mat> imageLevels = otsu.ReturnImageLevels();
+		//cv::imshow("image all levels", imageLevelAll);
+		//cv::imshow("image level 1", imageLevels[0]);
+		//cv::imshow("image level 2", imageLevels[1]);
+		//cv::imshow("image level 3", imageLevels[2]);
+		//cv::waitKey(0);
+		//cv::destroyAllWindows();
+	}
+}
+*/
 }
 
 cv::Point2f GetNearestPointIdx(std::vector<cv::Point2f> &intersectionPoints, cv::Point2f &pnt)
@@ -132,11 +140,8 @@ cv::Point2f GetNearestPointIdx(std::vector<cv::Point2f> &intersectionPoints, cv:
 			return intersectionPoints[indices[i]];	
 }
 
-void RemoveOtherPage(cv::Mat &imageRemBkgd, const cv::Mat &imageFixSize)
+cv::Mat RemoveOtherPage(cv::Mat image, char pageSide, std::vector<cv::Point> quads)
 {
-	char pageSide = CalcPageSide(imageRemBkgd);
-	DocAreaLSD docAreaLSD(imageFixSize);
-	std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
 	std::vector<cv::Point> polyPoints;
 	if (pageSide == 'L')
 	{
@@ -156,15 +161,18 @@ void RemoveOtherPage(cv::Mat &imageRemBkgd, const cv::Mat &imageFixSize)
 		polyPoints.push_back(cv::Point(0, 0));
 		polyPoints.push_back(cv::Point(0, IMAGE_FIX_SIZE.height - 1));
 	}
-	cv::fillConvexPoly(imageRemBkgd, polyPoints, cv::Scalar(0));
-	//cv::imshow("image poly removed", imageRemBkgd);
+	cv::Mat imageCut = image.clone();
+	cv::fillConvexPoly(imageCut, polyPoints, cv::Scalar(0));
+	//cv::imshow("image poly removed", imageCut);
+	return imageCut;
 }
 
-char CalcPageSide(cv::Mat imageBackground)
+char CalcPageSide(cv::Mat imageNoBkgd)
 {
 	// Convert to double type
-	cv::Mat img64;
-	cv::cvtColor(imageBackground, img64, cv::COLOR_BGR2GRAY);
+	cv::Mat img64 = imageNoBkgd;
+	if (imageNoBkgd.channels() > 1)
+		cv::cvtColor(imageNoBkgd, img64, cv::COLOR_BGR2GRAY);
 	img64.convertTo(img64, CV_64FC3);
 
 	// Calculate columns sum histogram
@@ -259,8 +267,8 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 
 	// Visualize
 	////cv::RNG rng(12345);
-	//cv::Mat imageIntersections = imageGridLevel.clone();
-	//cv::cvtColor(imageIntersections, imageIntersections, cv::COLOR_GRAY2BGR);
+	//cv::Mat imageIntersectPoints = imageGridLevel.clone();
+	//cv::cvtColor(imageIntersectPoints, imageIntersectPoints, cv::COLOR_GRAY2BGR);
 	//// Visualize contours
 	//for (int i = 0; i < contours.size(); i++)
 	//{
@@ -270,14 +278,14 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 	//		colorRng = cv::Scalar(200, 0, 0);
 	//	else// if ((contourRect.width > avgRectSize.width) && (contourRect.height > avgRectSize.height))
 	//		colorRng = cv::Scalar(0, 0, 255);
-	//	drawContours(imageIntersections, contours, i, colorRng, 3, 8);
+	//	drawContours(imageIntersectPoints, contours, i, colorRng, 3, 8);
 	//}
 	//// Visualize points
 	//for (int i = 0; i < mc.size(); i++)
 	//{
-	//	circle(imageIntersections, mc[i], 0, cv::Scalar(0, 255, 0), 2);
+	//	circle(imageIntersectPoints, mc[i], 0, cv::Scalar(0, 255, 0), 2);
 	//}
-	//cv::imshow("Contours and centers", imageIntersections);
+	//cv::imshow("Contours and centers", imageIntersectPoints);
 	//cv::waitKey(0);
 
 	return mc;
