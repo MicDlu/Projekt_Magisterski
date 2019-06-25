@@ -62,8 +62,8 @@ std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines()
 		cv::line(test2, lineInitPnt, verticalLine.back(), cv::Scalar(255, 0, 0));
 		circle(test, verticalLine.back(), 2, colorRng, 2);
 		circle(test2, verticalLine.back(), 2, colorRng, 2);
-		cv::imshow("test", test2);
-		cv::waitKey(0);
+		//cv::imshow("test", test2);
+		//cv::waitKey(0);
 
 		// Calc rest of line
 		while (FitsInImage(searchPnt) && !points.empty())
@@ -74,10 +74,10 @@ std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines()
 			// Visualization
 			cv::line(test2, searchPnt, searchPnt - shift, colorRng,2);
 			circle(test2, points[currPntIdx], 1, cv::Scalar(0, 255, 255), 2);
-			cv::imshow("test", test2);
-			char key = cv::waitKey(0);
-			if (key == 'b')
-				break;
+			//cv::imshow("test", test2);
+			//char key = cv::waitKey(0);
+			//if (key == 'b')
+			//	break;
 
 			// Skip if no point near searching point
 			if (GetPointsDistance(points[currPntIdx], searchPnt) > (avgDist / 2))			

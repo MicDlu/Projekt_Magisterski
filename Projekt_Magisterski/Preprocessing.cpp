@@ -29,6 +29,40 @@ std::vector<cv::String> GetFiles()
 	return files;
 }
 
+std::vector<cv::String> GetFiles2()
+{
+	std::vector<cv::String> files;
+	cv::String directory = "C:/Users/micha/Pictures/Images 2/";
+	files.push_back(directory + "IMG_20190625_140750.jpg");
+	files.push_back(directory + "IMG_20190625_140759.jpg");
+	files.push_back(directory + "IMG_20190625_140804.jpg");
+	files.push_back(directory + "IMG_20190625_140816.jpg");
+	files.push_back(directory + "IMG_20190625_140821.jpg");
+	files.push_back(directory + "IMG_20190625_140834.jpg");
+	files.push_back(directory + "IMG_20190625_140842.jpg");
+	files.push_back(directory + "IMG_20190625_140926.jpg");
+	files.push_back(directory + "IMG_20190625_140931.jpg");
+	files.push_back(directory + "IMG_20190625_140938.jpg");
+	files.push_back(directory + "IMG_20190625_140951.jpg");
+	//files.push_back(directory + "IMG_20190625_141012.jpg");
+	//files.push_back(directory + "IMG_20190625_141018.jpg");
+	//files.push_back(directory + "IMG_20190625_141036.jpg");
+	//files.push_back(directory + "IMG_20190625_141133.jpg");
+	files.push_back(directory + "IMG_20190625_141205.jpg");
+	files.push_back(directory + "IMG_20190625_141211.jpg");
+	files.push_back(directory + "IMG_20190625_141216.jpg");
+	files.push_back(directory + "IMG_20190625_141221.jpg");
+	files.push_back(directory + "IMG_20190625_141443.jpg");
+	files.push_back(directory + "IMG_20190625_141450.jpg");
+	files.push_back(directory + "IMG_20190625_141458.jpg");
+	files.push_back(directory + "IMG_20190625_141503.jpg");
+	files.push_back(directory + "IMG_20190625_141541.jpg");
+	files.push_back(directory + "IMG_20190625_141545.jpg");
+	files.push_back(directory + "IMG_20190625_141549.jpg");
+	files.push_back(directory + "IMG_20190625_141553.jpg");
+	return files;
+}
+
 //https://stackoverflow.com/questions/44047819/increase-image-brightness-without-overflow/44054699#44054699
 cv::Mat RemoveBackground(cv::Mat image)
 {

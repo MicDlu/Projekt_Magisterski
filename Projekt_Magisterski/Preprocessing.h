@@ -6,6 +6,8 @@ cv::Mat ThresholdImage(cv::Mat input);
 
 std::vector<cv::String> GetFiles();
 
+std::vector<cv::String> GetFiles2();
+
 cv::Mat RemoveBackground(cv::Mat image);
 
 cv::Mat ReduceVariety(cv::Mat image);

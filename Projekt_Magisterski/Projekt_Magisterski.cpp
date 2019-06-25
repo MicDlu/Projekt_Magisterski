@@ -6,7 +6,8 @@
 
 int main()
 {
-	std::vector<cv::String> files = GetFiles();
+	// std::vector<cv::String> files = GetFiles();
+	std::vector<cv::String> files = GetFiles2();
 	
 	// OTSU 3 LEVEL PAPER THRESHOLDING
 	if (OTSU_1)
@@ -22,10 +23,12 @@ int main()
 			OtsuN otsu(imagePreOtsu, 3);
 			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
 			std::vector<cv::Mat> imageLevels = otsu.ReturnImageLevels();
-			//cv::imshow("image all levels", imageLevelAll);
-			//cv::imshow("image level 1", imageLevels[0]);
-			//cv::imshow("image level 2", imageLevels[1]);
-			//cv::imshow("image level 3", imageLevels[2]);
+
+			cv::imshow("image no background", imageRemBkgd);
+			cv::imshow("image all levels", imageLevelAll);
+			cv::imshow("image level 1", imageLevels[0]);
+			cv::imshow("image level 2", imageLevels[1]);
+			cv::imshow("image level 3", imageLevels[2]);
 			//cv::waitKey(0);
 
 			//TrackbarIntersectionPoints(imageLevels[1]);
@@ -33,18 +36,22 @@ int main()
 			/////////////
 			std::vector<cv::Point2f> intersectionPoints = GetGridLevelIntersections(imageLevels[1]);
 
-			PointLines pointLines(intersectionPoints,quads);
-			cv::RNG rng(12345);
+			//PointLines pointLines(intersectionPoints,quads);
+			//cv::RNG rng(12345);
 			cv::Mat imageIntersections = imageRemBkgd.clone();
-			std::vector<std::vector<cv::Point2f>> vertLines = pointLines.GetVerticalLines();
-			for (int i = 0; i < vertLines.size(); i++)
+			for (int i = 0; i < intersectionPoints.size(); i++)
 			{
-				cv::Scalar colorRng = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-				for (int j = 0; j < vertLines[i].size(); j++)
-				{
-					circle(imageIntersections, vertLines[i][j], 0, colorRng, 5);
-				}
+				circle(imageIntersections, intersectionPoints[i], 0, cv::Scalar(0,0,255), 4);
 			}
+			//std::vector<std::vector<cv::Point2f>> vertLines = pointLines.GetVerticalLines();
+			//for (int i = 0; i < vertLines.size(); i++)
+			//{
+			//	cv::Scalar colorRng = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+			//	for (int j = 0; j < vertLines[i].size(); j++)
+			//	{
+			//		circle(imageIntersections, vertLines[i][j], 0, colorRng, 5);
+			//	}
+			//}
 			cv::imshow("imageIntersections", imageIntersections);
 			cv::waitKey(0);
 			/////////////
