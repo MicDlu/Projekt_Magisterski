@@ -100,22 +100,12 @@ cv::Mat OtsuPreReduceVariety(cv::Mat imageBGR, cv::Mat bkgdMask)
 	std::vector<cv::Mat> hsvChannels;
 	split(hsv, hsvChannels);
 
-	cv::imshow("imageBGR", imageBGR);
-
-	cv::Mat invMask;
-	cv::bitwise_not(bkgdMask, invMask);
-	cv::imshow("bkgdMask", invMask);
-	cv::Mat hsvValue;
-	cv::bitwise_or(hsvChannels[2], invMask, hsvValue);
-	cv::imshow("and", hsvValue);
-
-
-
 	cv::Mat imageMask, imageOutput;
 	cv::dilate(hsvChannels[2], imageMask, cv::Mat::ones(cv::Size(7, 7), CV_8U));
 	//cv::imshow("1.dilate", imageMask);
-	cv::medianBlur(imageMask, imageMask, 21);
-	//cv::imshow("2.median blur", imageMask);
+	//cv::medianBlur(imageMask, imageMask, 21);
+	cv::GaussianBlur(imageMask, imageMask, cv::Size(25,25),0);
+	//cv::imshow("2.blur", imageMask);
 	cv::erode(imageMask, imageMask, cv::Mat::ones(cv::Size(7, 7), CV_8U));
 	cv::absdiff(hsvChannels[2], imageMask, imageOutput);
 	//cv::imshow("3.difference", imageOutput);

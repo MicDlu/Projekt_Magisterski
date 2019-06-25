@@ -29,8 +29,8 @@ int main()
 			OtsuN otsu(imagePreOtsu, 3);
 			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
 			std::vector<cv::Mat> imageLevels = otsu.ReturnImageLevels();
-			cv::imshow("page mask", maskPage);
-			cv::imshow("page image", imagePage);
+			//cv::imshow("page mask", maskPage);
+			//cv::imshow("page image", imagePage);
 			cv::imshow("image all levels", imageLevelAll);
 			cv::imshow("image level 1", imageLevels[0]);
 			cv::imshow("image level 2", imageLevels[1]);

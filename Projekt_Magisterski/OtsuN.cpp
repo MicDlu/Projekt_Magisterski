@@ -31,7 +31,7 @@ OtsuN::OtsuN(cv::Mat image, int nOfLevels = 3)
 
 	// start recurences
 	NextLevel(nOfLevels-1, 0, 0, 0);
-
+	
 	// create images
 	int colorStep = 256 / nOfLevels;
 	imageLeveled = cv::Mat::zeros(image.size(), CV_8U);
@@ -57,7 +57,7 @@ OtsuN::OtsuN(cv::Mat image, int nOfLevels = 3)
 	}
 
 	// fix levels
-	if (OTSU_LEVELFIX)
+	if (false)
 	{
 		//imshow("level1 before fix", imageLevels[1]);
 
