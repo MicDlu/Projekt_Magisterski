@@ -19,19 +19,22 @@ int main()
 			DocAreaLSD docAreaLSD(imageFixSize);
 			std::vector<cv::Point> quads = docAreaLSD.GetQuadPoints();
 			// Crop to page			
-			cv::Mat bkgdMask = GetBackgroundMask(imageFixSize);
-			char pageSide = CalcPageSide(bkgdMask);
-			cv::Mat imagePage = CropPage(imageFixSize, pageSide, quads);
+			cv::Mat maskBkgd = GetBackgroundMask(imageFixSize);
+			char pageSide = CalcPageSide(maskBkgd);
+			cv::Mat maskPage = RemoveOtherPage(maskBkgd, pageSide, quads);
+			cv::Mat imagePage;
+			cv::copyTo(imageFixSize, imagePage, maskPage);
 			// Thresholding
-			cv::Mat imagePreOtsu = OtsuPreReduceVariety(imagePage);
+			cv::Mat imagePreOtsu = OtsuPreReduceVariety(imagePage,maskPage);
 			OtsuN otsu(imagePreOtsu, 3);
 			cv::Mat imageLevelAll = otsu.ReturnLeveledImage();
 			std::vector<cv::Mat> imageLevels = otsu.ReturnImageLevels();
-			cv::imshow("image no background", imagePreOtsu);
-			//cv::imshow("image all levels", imageLevelAll);
-			//cv::imshow("image level 1", imageLevels[0]);
-			//cv::imshow("image level 2", imageLevels[1]);
-			//cv::imshow("image level 3", imageLevels[2]);
+			cv::imshow("page mask", maskPage);
+			cv::imshow("page image", imagePage);
+			cv::imshow("image all levels", imageLevelAll);
+			cv::imshow("image level 1", imageLevels[0]);
+			cv::imshow("image level 2", imageLevels[1]);
+			cv::imshow("image level 3", imageLevels[2]);
 			cv::waitKey(0);
 
 			// Intersection points

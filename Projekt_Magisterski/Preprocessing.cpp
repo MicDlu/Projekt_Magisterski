@@ -93,22 +93,34 @@ cv::Mat GetBackgroundMask(cv::Mat imageBGR)
 	return imageOutput;
 }
 
-cv::Mat OtsuPreReduceVariety(cv::Mat imageBGR)
+cv::Mat OtsuPreReduceVariety(cv::Mat imageBGR, cv::Mat bkgdMask)
 {
 	cv::Mat hsv;
 	cvtColor(imageBGR, hsv, cv::COLOR_BGR2HSV);
 	std::vector<cv::Mat> hsvChannels;
 	split(hsv, hsvChannels);
 
-	cv::Mat imageMask, imageOutput;;
+	cv::imshow("imageBGR", imageBGR);
+
+	cv::Mat invMask;
+	cv::bitwise_not(bkgdMask, invMask);
+	cv::imshow("bkgdMask", invMask);
+	cv::Mat hsvValue;
+	cv::bitwise_or(hsvChannels[2], invMask, hsvValue);
+	cv::imshow("and", hsvValue);
+
+
+
+	cv::Mat imageMask, imageOutput;
 	cv::dilate(hsvChannels[2], imageMask, cv::Mat::ones(cv::Size(7, 7), CV_8U));
 	//cv::imshow("1.dilate", imageMask);
 	cv::medianBlur(imageMask, imageMask, 21);
 	//cv::imshow("2.median blur", imageMask);
+	cv::erode(imageMask, imageMask, cv::Mat::ones(cv::Size(7, 7), CV_8U));
 	cv::absdiff(hsvChannels[2], imageMask, imageOutput);
 	//cv::imshow("3.difference", imageOutput);
 
-	//cv::waitKey(0);
+	cv::waitKey(0);
 	return imageOutput;
 }
 
