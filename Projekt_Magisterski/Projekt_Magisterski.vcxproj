@@ -164,6 +164,7 @@
   <ItemGroup>
     <ClInclude Include="DocAreaLSD.h" />
     <ClInclude Include="LineExtender.h" />
+    <ClInclude Include="ManualIntersector.h" />
     <ClInclude Include="OtsuN.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="PointLines.h" />
@@ -174,6 +175,7 @@
   <ItemGroup>
     <ClCompile Include="DocAreaLSD.cpp" />
     <ClCompile Include="LineExtender.cpp" />
+    <ClCompile Include="ManualIntersector.cpp" />
     <ClCompile Include="OtsuN.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>

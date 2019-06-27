@@ -13,6 +13,12 @@ int main()
 	if (OTSU_1)
 		for (int i = 1; i < files.size(); i++)
 		{
+			ManualIntersector intersector(files[i]);
+			intersector.RunSelector();
+			ManualIntersector::PointVectorSet pointVectorSet = intersector.GetPointVectorSet();
+			intersector.SaveToFile();
+			continue;
+
 			cv::Mat imageInput = cv::imread(files[i]);
 			cv::Mat imageFixSize = FixImageSize(imageInput);
 			// Calc quad

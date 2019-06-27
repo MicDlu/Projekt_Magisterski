@@ -39,6 +39,9 @@
     <ClInclude Include="PointLines.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ManualIntersector.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -63,6 +66,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="PointLines.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ManualIntersector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
