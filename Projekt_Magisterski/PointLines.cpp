@@ -6,9 +6,52 @@ PointLines::PointLines(std::vector<cv::Point2f> points, std::vector<cv::Point> q
 {
 	this->points = points;
 	this->avgDist = GetAvgDist();
+	this->distApprox.width = ((quads[3].x - quads[0].x) + (quads[2].x - quads[1].x)) / 2.0 / GRIDS_HORIZ;
+	this->distApprox.height = ((quads[1].y - quads[0].y) + (quads[2].x - quads[3].x)) / 2.0 / GRIDS_VERTIC;
+	//this->points = ReducePoints(points);
+	//this->avgDist = GetAvgDist();
 	cv::Point2f quadTopLeft = cv::Point2f(quads[0].x, quads[0].y);
 	cv::Point2f quadBotLeft = cv::Point2f(quads[1].x, quads[1].y);
 	this->leftBoundAngle = GetLineAngle(quadTopLeft, quadBotLeft);
+}
+
+std::vector<cv::Point2f> PointLines::GetReducedPoints()
+{
+	return this->points;
+}
+
+std::vector<cv::Point2f> PointLines::ReducePoints(std::vector<cv::Point2f> &points)
+{
+	//cv::flann::KDTreeIndexParams indexParams;
+	//cv::flann::Index kdtree(cv::Mat(points).reshape(1), indexParams);
+	//std::vector<float> query(2);
+	//std::vector<int> indices;
+	//std::vector<float> dists;
+
+	//cv::Mat test = cv::Mat::zeros(IMAGE_FIX_SIZE, CV_8U);
+	std::vector<cv::Point2f> newPoints;
+	//for (int i = 0; i < points.size(); i++)
+	//{
+	//	circle(test, points[i], 2, cv::Scalar(100), 3);
+	//	//cv::imshow("test", test);
+	//	//cv::waitKey(0);
+	//	query[0] = points[i].x;
+	//	query[1] = points[i].y;
+	//	kdtree.knnSearch(query, indices, dists, 4);
+	//	bool status[3] = { true,true,true };
+	//	for (int j = 1; j < 4; j++)
+	//	{
+	//		cv::Size2f diff = points[indices[j]] - points[i];
+	//		cv::line(test, points[indices[j]], points[i], cv::Scalar(255));
+	//		if (abs(diff.width) < distApprox.width && abs(diff.height) < distApprox.height)
+	//			status[j-1] = false;
+	//	}
+	//	//cv::imshow("test", test);
+	//	//cv::waitKey(0);
+	//	if (status[0] || status[1] || status[2])
+	//		newPoints.push_back(points[i]);
+	//}
+	return newPoints;
 }
 
 std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines()
@@ -97,17 +140,25 @@ std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines()
 			searchPnt = verticalLine.back();
 			float currAngle = GetLineAngle(verticalLine[verticalLine.size() - 2], verticalLine[verticalLine.size() - 1]);
 			float avgAngle = GetAvgShiftAngle(angleHist);
-			if ((int)(currAngle + 100) % 180 < 20)
+			if ((int)(currAngle + 95) % 180 < 10)
 				angleHist.push_back(currAngle);
-			shift = PredictShift(avgDist, angleHist);
+			shift = PredictShift(avgDist, angleHist);			
 		}
 
 		// Calc next line init point
-		lineInitPnt = cv::Point2f(verticalLine.front().x + avgDist, verticalLine.front().y - avgDist);
+		lineInitPnt = cv::Point2f(verticalLine.front().x + this->distApprox.width, verticalLine.front().y - this->distApprox.height);
 		verticalLines.push_back(verticalLine);
 	}
-	cv::imshow("test", test);
-	cv::waitKey(0);
+
+	for (int i = 0; i < verticalLines.size(); )
+	{
+		if (verticalLines[i].size() < GRIDS_VERTIC / 2)
+			verticalLines.erase(verticalLines.begin() + i);
+		else
+			i++;
+	}
+	//cv::imshow("test", test);
+	//cv::waitKey(0);
 
 	return verticalLines;
 }
@@ -129,8 +180,8 @@ float PointLines::GetAvgDist()
 	std::vector<float> dists;
 
 	//cv::Mat test = cv::Mat::zeros(IMAGE_FIX_SIZE, CV_8UC3);
-	//for (int i = 0; i < points.size(); i++)
-	//	circle(test, points[i], 2, cv::Scalar(0, 0, 255), -1);
+	//for (int j = 0; j < points.size(); j++)
+	//	circle(test, points[j], 2, cv::Scalar(0, 0, 255), -1);
 
 	// calc nearest point dists for random points
 	float distSum = 0;

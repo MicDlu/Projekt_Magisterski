@@ -3,12 +3,14 @@ class PointLines
 {
 public:
 	PointLines(std::vector<cv::Point2f> points, std::vector<cv::Point> quads);
+	std::vector<cv::Point2f> GetReducedPoints();
 	std::vector<std::vector<cv::Point2f>> GetVerticalLines();
 	~PointLines();
 private:
 	std::vector<cv::Point2f> points;
 	float leftBoundAngle;
 	float avgDist;
+	cv::Size distApprox;
 	float GetAvgDist();
 	int GetNearestPointIdx(std::vector<cv::Point2f> &remainPts, cv::Point2f & pnt);
 	float GetPointsDistance(cv::Point2f & pnt1, cv::Point2f & pnt2);
@@ -16,5 +18,6 @@ private:
 	cv::Point2f PredictShift(float & dist, std::vector<float> &prevAngles);
 	float GetAvgShiftAngle(std::vector<float> prevShiftAngles);
 	bool FitsInImage(cv::Point2f & point);
+	std::vector<cv::Point2f> ReducePoints(std::vector<cv::Point2f> &points);
 };
 

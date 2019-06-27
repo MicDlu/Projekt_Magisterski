@@ -57,23 +57,25 @@ OtsuN::OtsuN(cv::Mat image, int nOfLevels = 3)
 	}
 
 	// fix levels
-	if (false)
+	if (OTSU_LEVELFIX)
 	{
-		//imshow("level1 before fix", imageLevels[1]);
-
-		//variant #1
 		cv::Mat reducer;
-		cv::dilate(imageLevels[2], reducer, cv::Mat::ones(cv::Size(3, 3), CV_8U));
-		cv::Mat v1 = imageLevels[1] - reducer;
-		//imshow("level1 after fix", v1);
+		cv::dilate(imageLevels[2], reducer, cv::Mat(cv::Size(2, 2), CV_8U));
+		reducer -= imageLevels[2];
+		cv::Mat newLevel1 = imageLevels[1] - reducer;
+		cv::Mat reduced = imageLevels[1] - newLevel1;
+		cv::Mat newLevel2 = imageLevels[2] + reduced;
 
-		//// variant #2
-		//cv::morphologyEx(imageLevels[1], reducer, cv::MORPH_OPEN, cv::Mat::ones(cv::Size(2, 2), CV_8U));
-		//cv::Mat v2 = reducer;
-		//imshow("v2", v2);
-
-		imageLevels[1] = v1;
+		//imshow("level1 before fix", imageLevels[1]);
+		//imshow("level2 before fix", imageLevels[2]);
+		//imshow("reducer", reducer);
+		imshow("level1 after fix", newLevel1);
+		//imshow("reduction", reduced);
+		imshow("level2 after fix", newLevel2);
 		//cv::waitKey(0);
+
+		imageLevels[1] = newLevel1;
+		imageLevels[2] = newLevel2;
 	}
 }
 

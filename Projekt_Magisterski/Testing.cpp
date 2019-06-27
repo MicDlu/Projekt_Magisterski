@@ -13,6 +13,7 @@ Testing::~Testing()
 
 int currHarrisBlockSize = 1;
 int currHarrisKSize = 1;
+int convHarrisKSize = 1;
 double currHarrisK = 0.05;
 int convHarrisK = currHarrisK *100;
 int currErodeSize = 3;
@@ -40,6 +41,8 @@ void TrackbarIntersectionPoints(cv::Mat imageIn)
 
 void OnHarrisBlockSizeChange(int, void*)
 {
+	if (!currHarrisBlockSize)
+		currHarrisBlockSize = 1;
 	currHarrisKSize = (currHarrisKSize % 2) ? currHarrisKSize : currHarrisKSize + 1;
 	double currHarrisK = convHarrisK / 100.0;
 	double currThresh = convThresh / 100.0;
@@ -63,7 +66,8 @@ std::vector<cv::Point2f> TestGetGridLevelIntersections(cv::Mat imageGridLevel)
 	cv::imshow("harris", imageHarris);
 
 	// Binarize corner pixels
-	cv::erode(imageHarris, imageHarris, cv::Mat::ones(cv::Size(currErodeSize, currErodeSize), CV_8U));
+	cv::Mat kernel = cv::getStructuringElement(cv::MORPH_CROSS, cv::Size(currErodeSize, currErodeSize));
+	cv::erode(imageHarris, imageHarris, kernel);
 	cv::imshow("erode", imageHarris);
 	cv::threshold(imageHarris, imageHarris, currThresh, currThreshMax, cv::ThresholdTypes::THRESH_BINARY);
 	cv::imshow("thresh", imageHarris);
@@ -98,4 +102,64 @@ std::vector<cv::Point2f> TestGetGridLevelIntersections(cv::Mat imageGridLevel)
 	cv::imshow("Testing", imageGridLevelCopy);
 
 	return mc;
+}
+
+/////////////////////////////
+
+void TrackbarHarris(cv::Mat imageIn)
+{
+	if (imageIn.channels() > 1)
+		cvtColor(imageIn, imageIn, cv::COLOR_RGB2GRAY);
+	image = imageIn;
+
+	std::string winName = "HARRIS";
+	cv::namedWindow(winName, 1);
+	cv::createTrackbar("BlockSize", winName, &currHarrisBlockSize, 20, HarrisOnChange);
+	cv::createTrackbar("KSize/2-1", winName, &convHarrisKSize, 10, HarrisOnChange);
+	cv::createTrackbar("K", winName, &convHarrisK, 100, HarrisOnChange);
+
+	HarrisRecalculate();
+	cv::waitKey(0);
+}
+
+void HarrisOnChange(int, void*)
+{
+	if (!currHarrisBlockSize)
+		currHarrisBlockSize = 1;
+	currHarrisKSize = convHarrisKSize * 2 - 1;
+	double currHarrisK = convHarrisK / 100.0;
+	HarrisRecalculate();
+}
+
+void HarrisRecalculate()
+{
+	// Calculate Harris Corners
+	// https://docs.opencv.org/3.0-beta/doc/py_tutorials/py_feature2d/py_features_harris/py_features_harris.html
+	cv::Mat imageHarris = cv::Mat::zeros(IMAGE_FIX_SIZE, CV_8U);
+	cv::cornerHarris(image, imageHarris, currHarrisBlockSize, currHarrisKSize, currHarrisK);
+	cv::imshow("HARRIS", imageHarris);
+
+
+
+	cv::Mat imageHarris1;
+	//cv::cornerHarris(image, imageHarris1, 3, 9, 0);
+	//cv::imshow("harris 1a", imageHarris1);
+	imageHarris.convertTo(imageHarris1, CV_8U, 255);
+	cv::imshow("harris 1b", imageHarris1);
+
+	cv::Mat imageHarris2;
+	//cv::cornerHarris(image, imageHarris2, 3, 9, 0);
+	cv::morphologyEx(imageHarris, imageHarris2, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+	cv::imshow("harris 2a", imageHarris2);
+	cv::threshold(imageHarris2, imageHarris2, 1, 255, cv::THRESH_BINARY);
+	imageHarris2.convertTo(imageHarris2, CV_8U, 255);
+	cv::imshow("harris 2b", imageHarris2);
+	cv::dilate(imageHarris2, imageHarris2, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3)));
+	cv::imshow("harris 2c", imageHarris2);
+	cv::GaussianBlur(imageHarris2, imageHarris2, cv::Size(3, 3), 0);
+	cv::imshow("harris 2d", imageHarris2);
+
+	cv::Mat harrisDiff;
+	harrisDiff = imageHarris1 - imageHarris2;
+	cv::imshow("harris 3", harrisDiff);
 }

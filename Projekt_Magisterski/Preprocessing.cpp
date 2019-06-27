@@ -103,12 +103,15 @@ cv::Mat OtsuPreReduceVariety(cv::Mat imageBGR, cv::Mat bkgdMask)
 	cv::Mat imageMask, imageOutput;
 	cv::dilate(hsvChannels[2], imageMask, cv::Mat::ones(cv::Size(7, 7), CV_8U));
 	//cv::imshow("1.dilate", imageMask);
-	//cv::medianBlur(imageMask, imageMask, 21);
 	cv::GaussianBlur(imageMask, imageMask, cv::Size(25,25),0);
 	//cv::imshow("2.blur", imageMask);
-	cv::erode(imageMask, imageMask, cv::Mat::ones(cv::Size(7, 7), CV_8U));
 	cv::absdiff(hsvChannels[2], imageMask, imageOutput);
 	//cv::imshow("3.difference", imageOutput);
+
+	cv::Mat invMask;
+	cv::bitwise_not(bkgdMask, invMask);
+	cv::copyTo(bkgdMask, imageOutput, invMask);
+	//cv::imshow("4.crop", imageOutput);
 
 	cv::waitKey(0);
 	return imageOutput;

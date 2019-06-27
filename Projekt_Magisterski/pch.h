@@ -14,9 +14,11 @@
 #define DRAW_EDGE TRUE
 #define DRAW_LSD FALSE
 #define RESIZE_LSD FALSE
-#define OTSU_LEVELFIX TRUE
+#define OTSU_LEVELFIX FALSE
 #define IMAGE_FIX_SIZE cv::Size(800,600)
 #define RAD2DEG 180.0 / CV_PI
+#define GRIDS_VERTIC 42
+#define GRIDS_HORIZ 30
 
 // TODO: add headers that you want to pre-compile here
 
