@@ -24,61 +24,6 @@ int main()
 			cv::Mat maskPage = RemoveOtherPage(maskBkgd, pageSide, quads);
 			cv::Mat imagePage;
 			cv::copyTo(imageFixSize, imagePage, maskPage);
-
-
-
-
-			cv::Mat imagePageGray;
-			cv::cvtColor(imagePage, imagePageGray, cv::COLOR_BGR2GRAY);
-
-			cv::Mat imageHarris;
-			cv::cornerHarris(imagePageGray, imageHarris, 4, 9, 0);
-			cv::imshow("harris INIT", imageHarris);
-
-			cv::Mat imageHarris1;
-			imageHarris.convertTo(imageHarris1, CV_8U, 255);
-			cv::imshow("harris 1b", imageHarris1);
-
-			cv::Mat imageHarris2;
-			cv::morphologyEx(imageHarris, imageHarris2, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
-			cv::imshow("harris 2a", imageHarris2);
-			cv::threshold(imageHarris2, imageHarris2, 1, 255, cv::THRESH_BINARY);
-			imageHarris2.convertTo(imageHarris2, CV_8U, 255);
-			cv::imshow("harris 2b", imageHarris2);
-			cv::dilate(imageHarris2, imageHarris2, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3)));
-			cv::imshow("harris 2c", imageHarris2);
-			cv::GaussianBlur(imageHarris2, imageHarris2, cv::Size(3, 3), 0);
-			cv::imshow("harris 2d", imageHarris2);
-
-			cv::Mat harrisDiff;
-			harrisDiff = imageHarris1 - imageHarris2;
-			cv::imshow("harris 3", harrisDiff);
-
-			cv::Mat harrisOut;
-			//cv::GaussianBlur(harrisDiff, harrisOut, cv::Size(3, 3), 0);
-			//cv::medianBlur(harrisDiff, harrisOut, 3);
-			cv::morphologyEx(harrisDiff, harrisOut, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(7, 7)));
-			cv::imshow("harris 4", harrisOut);
-			cv::erode(harrisOut, harrisOut, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
-			cv::imshow("harris 5", harrisOut);
-			cv::threshold(harrisOut, harrisOut, 15, 255, cv::THRESH_BINARY);
-			cv::imshow("harris 6", harrisOut);
-
-			std::vector<std::vector<cv::Point>> contours;
-			cv::findContours(harrisOut, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
-			//cv::Mat imageIntersectPoints = cv::Mat::zeros(IMAGE_FIX_SIZE, CV_8U);
-			cv::Mat imageIntersectPoints = harrisOut.clone();
-			cv::RNG rng(12345);
-			for (int i = 0; i < contours.size(); i++)
-			{
-				cv::Scalar colorRng = cv::Scalar(rng.uniform(200, 255));
-				drawContours(imageIntersectPoints, contours, i, colorRng);
-			}
-			cv::imshow("asd",imageIntersectPoints);
-
-			//TrackbarHarris(imagePage);
-			//TrackbarIntersectionPoints(imagePage);
-
 			// Thresholding
 			//cv::Mat imagePreOtsu = OtsuPreReduceVariety(imagePage,maskPage);
 			//OtsuN otsu(imagePreOtsu, 3);
@@ -86,47 +31,83 @@ int main()
 			//std::vector<cv::Mat> imageLevels = otsu.ReturnImageLevels();
 			//cv::imshow("input ", imageFixSize);
 			////cv::imshow("page mask", maskPage);
-			////cv::imshow("page image", imagePage);
+			cv::imshow("page image", imagePage);
 			////cv::imshow("image all levels", imageLevelAll);
 			////cv::imshow("image level 1", imageLevels[0]);
 			////cv::imshow("image level 2", imageLevels[1]);
 			////cv::imshow("image level 3", imageLevels[2]);
-			////cv::waitKey(0);
+			//cv::waitKey(0);
 
-			//TrackbarIntersectionPoints(imageLevels[1]);
 
-			///////
-			//int morphType = cv::MorphShapes::MORPH_ELLIPSE;
-			//cv::Mat kernel[9];
-			//for (int i = 0; i < 9; i++)			
-			//	kernel[i] = cv::getStructuringElement(morphType, cv::Size(i+1, i+1));
-			//cv::Mat kernelRect = cv::getStructuringElement(cv::MORPH_RECT, cv::Size(4,4));
-			//cv::Mat kernelCross = cv::getStructuringElement(cv::MORPH_CROSS	, cv::Size(3, 3));
-			//
-			//cv::Mat preReduce[7];
-			//preReduce[0] = imageLevels[2].clone();
 
-			//cv::dilate(preReduce[0], preReduce[1], kernel[3]);
-			//cv::erode(preReduce[1], preReduce[2], kernelRect);
-			//cv::dilate(preReduce[2], preReduce[3], kernel[5]);
-			////cv::filter2D(imageLevels[2], preReduce, 0, kernel);
-			//preReduce[4] = imageLevels[1] - preReduce[3];
-			////cv::morphologyEx(preReduce[4], preReduce[5], cv::MORPH_CLOSE, kernelCross);
-			////cv::GaussianBlur(preReduce[4], preReduce[5], cv::Size(5,5),0);
-			////cv::medianBlur(preReduce[4], preReduce[5], 5);
-			////cv::erode(preReduce[5], preReduce[6], kernel[5]);
-			////cv::erode(preReduce[5], preReduce[6], kernelRect);
 
-			//cv::imshow("TEST 1", preReduce[1]);
-			//cv::imshow("TEST 2", preReduce[2]);
-			//cv::imshow("TEST 3", preReduce[3]);
-			//cv::imshow("TEST 4", preReduce[4]);
-			////cv::imshow("TEST 5", preReduce[5]);
-			////cv::imshow("TEST 6", preReduce[6]);
+			cv::Mat imagePageGray;
+			cv::cvtColor(imagePage, imagePageGray, cv::COLOR_BGR2GRAY);
+			//imagePageGray = ReduceVariety(imagePage);
+			//cv::imshow("page gray", imagePageGray);
 
-			//cv::filter2D(preReduce[4],)
 
-			
+			cv::Mat imageHarris;
+			cv::cornerHarris(imagePageGray, imageHarris, 3, 9, 0);
+			//cv::imshow("harris INIT", imageHarris);
+
+			cv::Mat imageHarris1;
+			imageHarris.convertTo(imageHarris1, CV_8U, 255);
+			//cv::imshow("harris 1b", imageHarris1);
+
+			cv::Mat imageHarris2;
+			cv::morphologyEx(imageHarris, imageHarris2, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+			//cv::imshow("harris 2a", imageHarris2);
+			cv::threshold(imageHarris2, imageHarris2, 1, 255, cv::THRESH_BINARY);
+			imageHarris2.convertTo(imageHarris2, CV_8U, 255);
+			//cv::imshow("harris 2b", imageHarris2);
+			cv::dilate(imageHarris2, imageHarris2, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3)));
+			//cv::imshow("harris 2c", imageHarris2);
+			cv::GaussianBlur(imageHarris2, imageHarris2, cv::Size(3, 3), 0);
+			//cv::imshow("harris 2d", imageHarris2);
+
+			cv::Mat harrisDiff;
+			harrisDiff = imageHarris1 - imageHarris2;
+			//cv::imshow("harris 3", harrisDiff);
+
+			cv::Mat harrisOut;
+			cv::morphologyEx(harrisDiff, harrisOut, cv::MORPH_OPEN, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(7, 7)));
+			//cv::imshow("harris 4", harrisOut);
+			cv::erode(harrisOut, harrisOut, cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(5, 5)));
+			//cv::imshow("harris 5", harrisOut);
+			cv::threshold(harrisOut, harrisOut, 15, 255, cv::THRESH_BINARY);
+			cv::imshow("harris 6", harrisOut);
+
+
+			// contours and points
+			std::vector<std::vector<cv::Point>> contours;
+			cv::findContours(harrisOut, contours, cv::RETR_LIST, cv::CHAIN_APPROX_SIMPLE);
+			cv::Mat imageIntersectPoints = imageFixSize.clone();
+			cv::RNG rng(12345);
+			// Reject invalid contours and calculate centers
+			cv::Size grid;
+			grid.width = ((quads[3].x - quads[0].x) + (quads[2].x - quads[1].x)) / 2.0 / GRIDS_HORIZ;
+			grid.height = ((quads[1].y - quads[0].y) + (quads[2].x - quads[3].x)) / 2.0 / GRIDS_VERTIC;
+
+			std::vector<cv::Point2f> centers;
+			for (int i = 0; i < contours.size(); i++)
+			{
+				cv::Rect contourRect = cv::boundingRect(contours[i]);
+				if ((contourRect.width <= (3 * grid.width)) && (contourRect.height <= (3 * grid.height))) {
+					cv::Moments mu = moments(contours[i], true);
+					if (mu.m00 != 0)
+						centers.push_back(cv::Point2f(mu.m10 / mu.m00, mu.m01 / mu.m00));
+					else if ((contourRect.width > grid.width) && (contourRect.height > grid.height))
+						centers.push_back(cv::Point2f(contourRect.x + contourRect.width / 2, contourRect.y + contourRect.height / 2));
+				}
+			}
+			//for (int i = 0; i < centers.size(); i++)
+			//{
+			//	circle(imageIntersectPoints, centers[i], 1, cv::Scalar(0, 0, 255), 2);
+			//}
+			//cv::imshow("center", imageIntersectPoints);	
+
+			//TrackbarHarris(imagePage);
 
 			// Intersection points
 			//std::vector<cv::Point2f> intersectionPoints = GetGridLevelIntersections(imageLevels[1]);
@@ -139,25 +120,25 @@ int main()
 			//}
 
 			// Draw lines
-			//PointLines pointLines(intersectionPoints,quads);
-			//std::vector<std::vector<cv::Point2f>> vertLines = pointLines.GetVerticalLines();
+			PointLines pointLines(centers,quads);
+			std::vector<std::vector<cv::Point2f>> vertLines = pointLines.GetVerticalLines();
 			//std::vector<cv::Point2f> newIntersectionPoints = pointLines.GetReducedPoints();
 			//cv::RNG rng(12345);
-			//cv::Mat imageIntersectLines = imagePage.clone();
+			cv::Mat imageIntersectLines = imagePage.clone();
 			//for (int i = 0; i < newIntersectionPoints.size(); i++)
 			//{
 			//	circle(imageIntersectPoints, newIntersectionPoints[i], 0, cv::Scalar(0, 255, 255), 3);
 			//}
 			//cv::imshow("imageIntersections", imageIntersectPoints);
-			//for (int i = 0; i < vertLines.size(); i++)
-			//{
-			//	cv::Scalar colorRng = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
-			//	for (int j = 0; j < vertLines[i].size(); j++)
-			//	{
-			//		circle(imageIntersectLines, vertLines[i][j], 0, colorRng, 5);
-			//	}
-			//}
-			//cv::imshow("Intersections lines", imageIntersectLines);
+			for (int i = 0; i < vertLines.size(); i++)
+			{
+				cv::Scalar colorRng = cv::Scalar(rng.uniform(0, 255), rng.uniform(0, 255), rng.uniform(0, 255));
+				for (int j = 0; j < vertLines[i].size(); j++)
+				{
+					circle(imageIntersectLines, vertLines[i][j], 0, colorRng, 5);
+				}
+			}
+			cv::imshow("Intersections lines", imageIntersectLines);
 			cv::waitKey(0);
 			cv::destroyAllWindows();
 		}
@@ -380,9 +361,9 @@ std::vector<cv::Point2f> GetGridLevelIntersections(cv::Mat imageGridLevel)
 	//	drawContours(imageIntersectPoints, contours, i, colorRng, 3, 8);
 	//}
 	//// Visualize points
-	//for (int i = 0; i < mc.size(); i++)
+	//for (int i = 0; i < centers.size(); i++)
 	//{
-	//	circle(imageIntersectPoints, mc[i], 0, cv::Scalar(0, 255, 0), 2);
+	//	circle(imageIntersectPoints, centers[i], 0, cv::Scalar(0, 255, 0), 2);
 	//}
 	//cv::imshow("Contours and centers", imageIntersectPoints);
 	//cv::waitKey(0);

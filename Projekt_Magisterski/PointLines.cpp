@@ -105,8 +105,8 @@ std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines()
 		cv::line(test2, lineInitPnt, verticalLine.back(), cv::Scalar(255, 0, 0));
 		circle(test, verticalLine.back(), 2, colorRng, 2);
 		circle(test2, verticalLine.back(), 2, colorRng, 2);
-		//cv::imshow("test", test2);
-		//cv::waitKey(0);
+		cv::imshow("test", test2);
+		cv::waitKey(0);
 
 		// Calc rest of line
 		while (FitsInImage(searchPnt) && !points.empty())
@@ -117,10 +117,10 @@ std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines()
 			// Visualization
 			cv::line(test2, searchPnt, searchPnt - shift, colorRng,2);
 			circle(test2, points[currPntIdx], 1, cv::Scalar(0, 255, 255), 2);
-			//cv::imshow("test", test2);
-			//char key = cv::waitKey(0);
-			//if (key == 'b')
-			//	break;
+			cv::imshow("test", test2);
+			char key = cv::waitKey(0);
+			if (key == 'b')
+				break;
 
 			// Skip if no point near searching point
 			if (GetPointsDistance(points[currPntIdx], searchPnt) > (avgDist / 2))			
@@ -133,15 +133,29 @@ std::vector<std::vector<cv::Point2f>> PointLines::GetVerticalLines()
 			// Visualization
 			circle(test, verticalLine.back(), 2, colorRng, 2);
 			circle(test2, verticalLine.back(), 2, colorRng, 2);
-			//cv::imshow("test", test2);
-			//cv::waitKey(0);
+			cv::imshow("test", test2);
+			cv::waitKey(0);
 
 			// Calc searching point and shift
-			searchPnt = verticalLine.back();
+			searchPnt.x = (verticalLine.back().x + searchPnt.x) / 2;
 			float currAngle = GetLineAngle(verticalLine[verticalLine.size() - 2], verticalLine[verticalLine.size() - 1]);
 			float avgAngle = GetAvgShiftAngle(angleHist);
-			if ((int)(currAngle + 95) % 180 < 10)
+			////
+			std::stringstream ss;
+			for (size_t i = 0; i < angleHist.size(); ++i)
+			{
+				if (i != 0)
+					ss << ",";
+				ss << angleHist[i];
+			}
+			std::string s = ss.str();
+			std::cout << avgAngle << ": " << s << std::endl;
+			////
+			//if ((int)(currAngle + 95) % 180 < 10)
+			if (abs(abs(currAngle) - abs(avgAngle)) < 10)
 				angleHist.push_back(currAngle);
+			else
+				int a = 1;
 			shift = PredictShift(avgDist, angleHist);			
 		}
 
