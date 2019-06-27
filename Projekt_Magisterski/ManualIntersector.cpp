@@ -50,7 +50,7 @@ void ManualIntersector::OnMouseEvent(int event, int x, int y, int flags, void * 
 		default:
 		break;
 	}
-	cv::imshow(manualIntersector->windowName, manualIntersector->GetDrawing());
+	cv::imshow(manualIntersector->windowName, manualIntersector->GetDrawing(true));
 	cv::waitKey(1);
 }
 
@@ -72,13 +72,13 @@ void ManualIntersector::InitNewLine()
 	pointVectorSet.push_back(std::vector<cv::Point>());
 }
 
-cv::Mat ManualIntersector::GetDrawing()
+cv::Mat ManualIntersector::GetDrawing(bool highlightLast)
 {
 	cv::Mat drawing = fixedImage.clone();
 	cv::Scalar color;
 	for (int iL = 0; iL < pointVectorSet.size(); iL++)
 	{
-		if (iL == pointVectorSet.size()-1)
+		if (highlightLast && (iL == pointVectorSet.size()-1))
 			color = cv::Scalar(0, 0, 255);
 		else
 			color = cv::Scalar(0, 255, 255);
@@ -92,7 +92,7 @@ cv::Mat ManualIntersector::GetDrawing()
 	return drawing;
 }
 
-void ManualIntersector::SaveToFile()
+void ManualIntersector::SaveFileDescription()
 {
 	int fileExtDotPos = imagePath.rfind('.');
 	if (std::string::npos != fileExtDotPos)
@@ -114,4 +114,35 @@ void ManualIntersector::SaveToFile()
 		}
 		imageDescriptionFile.close();
 	}
+}
+
+bool ManualIntersector::LoadImageDescription(cv::String txtFilePath)
+{
+	if (txtFilePath == "")
+	{
+		int fileExtDotPos = imagePath.rfind('.');
+		txtFilePath = imagePath.substr(0, fileExtDotPos) + ".txt";
+	}
+	std::ifstream imageDescriptionFile(txtFilePath);
+	if (imageDescriptionFile.is_open())
+	{
+		this->imageDescrptionPath = txtFilePath;
+		cv::String line;
+		this->pointVectorSet.clear();
+		while (std::getline(imageDescriptionFile,line))
+		{
+			std::stringstream lineStream(line);
+			cv::String element;
+			InitNewLine();
+			while (std::getline(lineStream, element, ';'))
+			{
+				int separatorPos = element.rfind(",");
+				int x = std::stoi(element.substr(1, separatorPos));
+				int y = std::stoi(element.substr(separatorPos + 1, element.size() - separatorPos - 2));
+				AddPoint(x, y);
+			}
+		}
+		return true;
+	}
+	return false;
 }

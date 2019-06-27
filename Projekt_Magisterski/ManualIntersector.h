@@ -24,7 +24,8 @@ public:
 	~ManualIntersector();
 	void RunSelector();
 	PointVectorSet GetPointVectorSet();
-	cv::Mat GetDrawing();
-	void SaveToFile();
+	cv::Mat GetDrawing(bool highlightLast);
+	void SaveFileDescription();
+	bool LoadImageDescription(cv::String txtFilePath = "");
 };
 

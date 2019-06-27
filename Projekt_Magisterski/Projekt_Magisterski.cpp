@@ -14,9 +14,16 @@ int main()
 		for (int i = 1; i < files.size(); i++)
 		{
 			ManualIntersector intersector(files[i]);
-			intersector.RunSelector();
-			ManualIntersector::PointVectorSet pointVectorSet = intersector.GetPointVectorSet();
-			intersector.SaveToFile();
+
+			//CREATE
+			//intersector.RunSelector();
+			//ManualIntersector::PointVectorSet pointVectorSet = intersector.GetPointVectorSet();
+			//intersector.SaveFileDescription();
+
+			//LOAD
+			intersector.LoadImageDescription();
+			cv::imshow("loaded", intersector.GetDrawing(false));
+			cv::waitKey(0);
 			continue;
 
 			cv::Mat imageInput = cv::imread(files[i]);
