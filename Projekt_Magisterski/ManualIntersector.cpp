@@ -17,11 +17,13 @@ ManualIntersector::~ManualIntersector()
 {
 }
 
-void ManualIntersector::RunSelector()
+void ManualIntersector::RunSelector(std::string titlePrefix)
 {
-	InitNewLine();
+	this->windowName = titlePrefix + (titlePrefix.empty()?"":" - ") + this->imagePath;
 	cv::namedWindow(windowName, 1);
 	cv::setMouseCallback(windowName,OnMouseEvent,this);
+	this->pointVectorSet.clear();
+	InitNewLine();
 	cv::waitKey(0);
 	cv::destroyWindow(windowName);
 	if (pointVectorSet.back().size() == 0)
@@ -92,16 +94,17 @@ cv::Mat ManualIntersector::GetDrawing(bool highlightLast)
 	return drawing;
 }
 
-void ManualIntersector::SaveFileDescription()
+bool ManualIntersector::SaveFileDescription(std::string &filePathRef, std::string fileNameSuffix)
 {
 	int fileExtDotPos = imagePath.rfind('.');
 	if (std::string::npos != fileExtDotPos)
 	{
-		this->imageDescrptionPath = imagePath.substr(0, fileExtDotPos) + ".txt";
+		this->imageDescrptionPath = imagePath.substr(0, fileExtDotPos) + fileNameSuffix + ".txt";
 		for (int i = 2; std::ifstream(this->imageDescrptionPath.c_str()).good(); i++)
 		{
-			this->imageDescrptionPath = imagePath.substr(0, fileExtDotPos) + "(" + std::to_string(i) + ").txt";
+			this->imageDescrptionPath = imagePath.substr(0, fileExtDotPos) + fileNameSuffix + "(" + std::to_string(i) + ").txt";
 		}
+		filePathRef = this->imageDescrptionPath;
 		std::ofstream imageDescriptionFile;
 		imageDescriptionFile.open(this->imageDescrptionPath);
 		for (std::vector<cv::Point> line : this->pointVectorSet)
@@ -113,16 +116,15 @@ void ManualIntersector::SaveFileDescription()
 			imageDescriptionFile << std::endl;
 		}
 		imageDescriptionFile.close();
+		return true;
 	}
+	return false;
 }
 
-bool ManualIntersector::LoadImageDescription(cv::String txtFilePath)
+bool ManualIntersector::LoadImageDescription(std::string fileNameSuffix)
 {
-	if (txtFilePath == "")
-	{
-		int fileExtDotPos = imagePath.rfind('.');
-		txtFilePath = imagePath.substr(0, fileExtDotPos) + ".txt";
-	}
+	int fileExtDotPos = imagePath.rfind('.');
+	std::string txtFilePath = imagePath.substr(0, fileExtDotPos) + fileNameSuffix + ".txt";
 	std::ifstream imageDescriptionFile(txtFilePath);
 	if (imageDescriptionFile.is_open())
 	{

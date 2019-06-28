@@ -12,7 +12,7 @@ private:
 	cv::Mat fixedImage;
 	cv::Size2f sizeFactor;
 	PointVectorSet pointVectorSet;
-	cv::String const windowName = "Manual intersection selection";
+	cv::String windowName;
 //Methods
 private:
 	void AddPoint(int x, int y);
@@ -22,10 +22,10 @@ private:
 public:
 	ManualIntersector(cv::String filePath);
 	~ManualIntersector();
-	void RunSelector();
+	void RunSelector(std::string title);
 	PointVectorSet GetPointVectorSet();
 	cv::Mat GetDrawing(bool highlightLast);
-	void SaveFileDescription();
-	bool LoadImageDescription(cv::String txtFilePath = "");
+	bool SaveFileDescription(std::string &filePathRef, std::string fileNameSuffix = "");
+	bool LoadImageDescription(std::string fileNameSuffix = "");
 };
 

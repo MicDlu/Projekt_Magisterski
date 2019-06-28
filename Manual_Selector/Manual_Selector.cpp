@@ -7,15 +7,20 @@
 int main()
 {
 	std::string filePath;
+	std::string descriptionPath;
 	while (OpenJpgFile(filePath))
 	{
-		std::cout << filePath << std::endl;
-		//CREATE
+		std::cout << std::endl << "Wczytano plik: " << filePath;
 		ManualIntersector intersector(filePath);
-		intersector.RunSelector();
-		ManualIntersector::PointVectorSet pointVectorSet = intersector.GetPointVectorSet();
-		intersector.SaveFileDescription();
+		intersector.RunSelector("poziomo");
+		intersector.SaveFileDescription(descriptionPath,"_H");
+		std::cout << "Zapisano definicje: " << descriptionPath << std::endl;
+		intersector.RunSelector("pionowo");
+		intersector.SaveFileDescription(descriptionPath,"_V");
+		std::cout << "Zapisano definicje: " << descriptionPath << std::endl;
 	}
+	std::cout << std::endl << "Dziêki za pomoc <3";
+	std::cin.ignore();
 }
 
 bool OpenJpgFile(std::string &filePath)
