@@ -7,8 +7,8 @@ ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSiz
 	this->imagePath = imagePath;
 	this->inputImage = cv::imread(imagePath);
 	cv::resize(inputImage, this->fixedImage, interfaceSize);
-	this->sizeFactor.width = this->inputImage.size().width / this->inputImage.size().width;
-	this->sizeFactor.height = this->inputImage.size().height / this->inputImage.size().height;
+	this->sizeFactor.width = this->inputImage.size().width / interfaceSize.width;
+	this->sizeFactor.height = this->inputImage.size().height / interfaceSize.height;
 	pointVectorSet.clear();
 }
 
@@ -61,6 +61,11 @@ void ManualIntersector::AddPoint(int x, int y)
 	pointVectorSet.back().push_back(cv::Point(x, y));
 }
 
+void ManualIntersector::AddPoint(cv::Point point)
+{
+	pointVectorSet.back().push_back(point);
+}
+
 void ManualIntersector::UndoPoint()
 {
 	if (pointVectorSet.back().size())
@@ -111,6 +116,7 @@ bool ManualIntersector::SaveFileDescription(std::string &filePathRef, std::strin
 		{
 			for (cv::Point point : line)
 			{
+				TranslateToOriginal(point);
 				imageDescriptionFile << cv::format("(%d,%d);", point.x, point.y);
 			}
 			imageDescriptionFile << std::endl;
@@ -139,12 +145,26 @@ bool ManualIntersector::LoadImageDescription(std::string fileNameSuffix)
 			while (std::getline(lineStream, element, ';'))
 			{
 				int separatorPos = element.rfind(",");
-				int x = std::stoi(element.substr(1, separatorPos));
-				int y = std::stoi(element.substr(separatorPos + 1, element.size() - separatorPos - 2));
-				AddPoint(x, y);
+				cv::Point point;
+				point.x = std::stoi(element.substr(1, separatorPos));
+				point.y = std::stoi(element.substr(separatorPos + 1, element.size() - separatorPos - 2));
+				TranslateToProjection(point);
+				AddPoint(point);
 			}
 		}
 		return true;
 	}
 	return false;
+}
+
+void ManualIntersector::TranslateToOriginal(cv::Point &point)
+{
+	point.x = point.x * this->sizeFactor.width;
+	point.y = point.y * this->sizeFactor.height;
+}
+
+void ManualIntersector::TranslateToProjection(cv::Point &point)
+{
+	point.x = point.x / this->sizeFactor.width;
+	point.y = point.y / this->sizeFactor.height;
 }

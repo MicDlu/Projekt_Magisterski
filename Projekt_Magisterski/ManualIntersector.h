@@ -16,9 +16,12 @@ private:
 //Methods
 private:
 	void AddPoint(int x, int y);
+	void AddPoint(cv::Point point);
 	void UndoPoint();
 	void InitNewLine();
 	static void OnMouseEvent(int event, int x, int y, int flags, void* userdata);
+	void TranslateToOriginal(cv::Point &point);
+	void TranslateToProjection(cv::Point & point);
 public:
 	ManualIntersector(cv::String filePath, cv::Size interfaceSize);
 	~ManualIntersector();
