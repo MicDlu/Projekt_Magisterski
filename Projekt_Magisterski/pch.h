@@ -16,7 +16,6 @@
 #define RESIZE_LSD FALSE
 #define OTSU_LEVELFIX FALSE
 #define IMAGE_FIX_SIZE cv::Size(800,600)
-#define IMAGE_SIZE_HD cv::Size(1280,768)
 #define RAD2DEG 180.0 / CV_PI
 #define GRIDS_VERTIC 42
 #define GRIDS_HORIZ 30

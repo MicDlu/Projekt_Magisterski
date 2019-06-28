@@ -2,11 +2,11 @@
 #include "ManualIntersector.h"
 
 
-ManualIntersector::ManualIntersector(cv::String imagePath)
+ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSize)
 {
 	this->imagePath = imagePath;
 	this->inputImage = cv::imread(imagePath);
-	cv::resize(inputImage, this->fixedImage, IMAGE_SIZE_HD);
+	cv::resize(inputImage, this->fixedImage, interfaceSize);
 	this->sizeFactor.width = this->inputImage.size().width / this->inputImage.size().width;
 	this->sizeFactor.height = this->inputImage.size().height / this->inputImage.size().height;
 	pointVectorSet.clear();

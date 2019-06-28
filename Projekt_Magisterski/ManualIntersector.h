@@ -20,7 +20,7 @@ private:
 	void InitNewLine();
 	static void OnMouseEvent(int event, int x, int y, int flags, void* userdata);
 public:
-	ManualIntersector(cv::String filePath);
+	ManualIntersector(cv::String filePath, cv::Size interfaceSize);
 	~ManualIntersector();
 	void RunSelector(std::string title);
 	PointVectorSet GetPointVectorSet();

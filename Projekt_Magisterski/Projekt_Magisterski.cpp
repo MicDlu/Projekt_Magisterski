@@ -13,7 +13,7 @@ int main()
 	if (OTSU_1)
 		for (int i = 1; i < files.size(); i++)
 		{
-			ManualIntersector intersector(files[i]);
+			ManualIntersector intersector(files[i],IMAGE_FIX_SIZE);
 
 			//CREATE
 			//intersector.RunSelector();
