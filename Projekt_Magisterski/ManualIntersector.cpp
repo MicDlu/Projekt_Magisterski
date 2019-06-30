@@ -1,17 +1,15 @@
 #include "pch.h"
 #include "ManualIntersector.h"
 
-
 ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSize)
 {
 	this->imagePath = imagePath;
 	this->inputImage = cv::imread(imagePath);
 	cv::resize(inputImage, this->fixedImage, interfaceSize);
-	this->sizeFactor.width = this->inputImage.size().width / interfaceSize.width;
-	this->sizeFactor.height = this->inputImage.size().height / interfaceSize.height;
+	this->sizeFactor.width = (float)this->inputImage.size().width / interfaceSize.width;
+	this->sizeFactor.height = (float)this->inputImage.size().height / interfaceSize.height;
 	pointVectorSet.clear();
 }
-
 
 ManualIntersector::~ManualIntersector()
 {
@@ -167,4 +165,28 @@ void ManualIntersector::TranslateToProjection(cv::Point &point)
 {
 	point.x = point.x / this->sizeFactor.width;
 	point.y = point.y / this->sizeFactor.height;
+}
+
+bool OpenJpgFile(std::string &filePath)
+{
+	const std::wstring title = L"Select a File";
+	std::wstring filename(MAX_PATH, L'\0');
+
+	OPENFILENAMEW ofn = { };
+	ofn.lStructSize = sizeof(ofn);
+	ofn.hwndOwner = NULL;
+	ofn.lpstrFilter = L"Image (.jpg)\0*.jpg\0All\0*.*\0";
+	ofn.lpstrFile = &filename[0];  // use the std::wstring buffer directly
+	ofn.nMaxFile = MAX_PATH;
+	ofn.lpstrTitle = title.c_str();
+	ofn.Flags = OFN_DONTADDTORECENT | OFN_FILEMUSTEXIST;
+
+	if (GetOpenFileNameW(&ofn))
+	{
+		using convert_type = std::codecvt_utf8<wchar_t>;
+		std::wstring_convert<convert_type, wchar_t> converter;
+		filePath = converter.to_bytes(filename).c_str();
+		return true;
+	}
+	return false;
 }
