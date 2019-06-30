@@ -43,5 +43,6 @@ public:
 	cv::Mat GetDrawing(bool highlightLast);
 	bool SaveFileDescription(std::string &filePathRef, std::string fileNameSuffix = "");
 	bool LoadImageDescription(std::string fileNameSuffix = "");
+	std::string GetFilePathNoExtension();
 };
 

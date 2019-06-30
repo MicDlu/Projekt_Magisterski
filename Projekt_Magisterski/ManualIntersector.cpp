@@ -99,36 +99,30 @@ cv::Mat ManualIntersector::GetDrawing(bool highlightLast)
 
 bool ManualIntersector::SaveFileDescription(std::string &filePathRef, std::string fileNameSuffix)
 {
-	int fileExtDotPos = imagePath.rfind('.');
-	if (std::string::npos != fileExtDotPos)
+	this->imageDescrptionPath = GetFilePathNoExtension() + fileNameSuffix + ".txt";
+	for (int i = 2; std::ifstream(this->imageDescrptionPath.c_str()).good(); i++)
 	{
-		this->imageDescrptionPath = imagePath.substr(0, fileExtDotPos) + fileNameSuffix + ".txt";
-		for (int i = 2; std::ifstream(this->imageDescrptionPath.c_str()).good(); i++)
-		{
-			this->imageDescrptionPath = imagePath.substr(0, fileExtDotPos) + fileNameSuffix + "(" + std::to_string(i) + ").txt";
-		}
-		filePathRef = this->imageDescrptionPath;
-		std::ofstream imageDescriptionFile;
-		imageDescriptionFile.open(this->imageDescrptionPath);
-		for (std::vector<cv::Point> line : this->pointVectorSet)
-		{
-			for (cv::Point point : line)
-			{
-				TranslateToOriginal(point);
-				imageDescriptionFile << cv::format("(%d,%d);", point.x, point.y);
-			}
-			imageDescriptionFile << std::endl;
-		}
-		imageDescriptionFile.close();
-		return true;
+		this->imageDescrptionPath = GetFilePathNoExtension() + fileNameSuffix + "(" + std::to_string(i) + ").txt";
 	}
-	return false;
+	filePathRef = this->imageDescrptionPath;
+	std::ofstream imageDescriptionFile;
+	imageDescriptionFile.open(this->imageDescrptionPath);
+	for (std::vector<cv::Point> line : this->pointVectorSet)
+	{
+		for (cv::Point point : line)
+		{
+			TranslateToOriginal(point);
+			imageDescriptionFile << cv::format("(%d,%d);", point.x, point.y);
+		}
+		imageDescriptionFile << std::endl;
+	}
+	imageDescriptionFile.close();
+	return std::ifstream(this->imageDescrptionPath.c_str()).good();
 }
 
 bool ManualIntersector::LoadImageDescription(std::string fileNameSuffix)
 {
-	int fileExtDotPos = imagePath.rfind('.');
-	std::string txtFilePath = imagePath.substr(0, fileExtDotPos) + fileNameSuffix + ".txt";
+	std::string txtFilePath = GetFilePathNoExtension() + fileNameSuffix + ".txt";
 	std::ifstream imageDescriptionFile(txtFilePath);
 	if (imageDescriptionFile.is_open())
 	{
@@ -189,4 +183,10 @@ bool OpenJpgFile(std::string &filePath)
 		return true;
 	}
 	return false;
+}
+
+std::string ManualIntersector::GetFilePathNoExtension()
+{
+	int fileExtDotPos = imagePath.rfind('.');
+	return imagePath.substr(0, fileExtDotPos);
 }

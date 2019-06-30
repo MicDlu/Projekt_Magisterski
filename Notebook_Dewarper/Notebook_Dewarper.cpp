@@ -90,7 +90,7 @@ int main()
 		cv::imshow("part", dst);
 		cv::waitKey(0);
 
-		cv::imwrite("C:/Users/micha/Pictures/Images/dst.jpg", dst);
+		cv::imwrite(intersector.GetFilePathNoExtension + "_Persp.jpg", dst);
 
 		//cv::Mat transform = cv::getPerspectiveTransform(srcQuads.front(), dstQuads.front());
 		//cv::Mat imageWarped;
