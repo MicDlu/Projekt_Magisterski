@@ -19,6 +19,7 @@
 #include <opencv2/opencv.hpp>
 
 #include "../Projekt_Magisterski/ManualIntersector.h"
+#include "CThinPlateSpline.h"
 
 // TODO: add headers that you want to pre-compile here
 

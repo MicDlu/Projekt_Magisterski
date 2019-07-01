@@ -190,3 +190,18 @@ std::string ManualIntersector::GetFilePathNoExtension()
 	int fileExtDotPos = imagePath.rfind('.');
 	return imagePath.substr(0, fileExtDotPos);
 }
+
+ManualIntersector::PointVectorSet ManualIntersector::GetScaledVectorSet(float scale)
+{
+	PointVectorSet scaledVectorSet;
+	for (std::vector<cv::Point> line : this->pointVectorSet)
+	{
+		std::vector<cv::Point> scaledLine;
+		for (cv::Point point : line)
+		{
+			scaledLine.push_back(point*scale);
+		}
+		scaledVectorSet.push_back(scaledLine);
+	}
+	return scaledVectorSet;
+}

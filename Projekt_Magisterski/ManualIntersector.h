@@ -44,5 +44,6 @@ public:
 	bool SaveFileDescription(std::string &filePathRef, std::string fileNameSuffix = "");
 	bool LoadImageDescription(std::string fileNameSuffix = "");
 	std::string GetFilePathNoExtension();
+	PointVectorSet GetScaledVectorSet(float scale = 1);
 };
 

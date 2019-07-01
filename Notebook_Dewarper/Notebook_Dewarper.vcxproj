@@ -158,10 +158,12 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\Projekt_Magisterski\ManualIntersector.h" />
+    <ClInclude Include="CThinPlateSpline.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Projekt_Magisterski\ManualIntersector.cpp" />
+    <ClCompile Include="CThinPlateSpline.cpp" />
     <ClCompile Include="Notebook_Dewarper.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
