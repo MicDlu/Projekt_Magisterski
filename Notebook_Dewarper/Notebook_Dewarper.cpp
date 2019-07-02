@@ -2,25 +2,52 @@
 //
 
 #include "pch.h"
+#include "Notebook_Dewarper.h"
 
 int main()
 {
     std::cout << "Hello World!\n";
 	std::string jpgFilePath;
 	OpenJpgFile(jpgFilePath);
-	ManualIntersector intersector(jpgFilePath, IMAGE_SIZE_SVGA);
-	if (intersector.LoadImageDescription("_H"))
+	ManualIntersector intersectorH(jpgFilePath, IMAGE_SIZE_SVGA);
+	if (intersectorH.LoadImageDescription("_H"))
 	{
-		cv::imshow("test", intersector.GetDrawing(false));
-		//cv::waitKey(0);
+		ManualIntersector::PointVectorSet pointVectorSetH = intersectorH.GetPointVectorSet();
+		cv::imshow("Drawing H", intersectorH.GetDrawing(false));
 
-		ManualIntersector::PointVectorSet pointVectorSet = intersector.GetPointVectorSet();
+		ManualIntersector::PointVectorSet resultVectorSet;
+		if (true)
+		{
+			ManualIntersector intersectorV(jpgFilePath, IMAGE_SIZE_SVGA);
+			if (intersectorV.LoadImageDescription("_V"))
+			{
+				ManualIntersector::PointVectorSet pointVectorSetV = intersectorV.GetPointVectorSet();
+				cv::imshow("Drawing V", intersectorV.GetDrawing(false));
+				resultVectorSet = GetVectorSetsIntersection(pointVectorSetH, pointVectorSetV);
+
+				cv::Mat drawing = cv::imread(jpgFilePath);
+				cv::resize(drawing, drawing, IMAGE_SIZE_SVGA);
+				for (std::vector<cv::Point> line : resultVectorSet)
+				{
+					for (cv::Point point : line)
+					{
+						cv::circle(drawing, point, 2, cv::Scalar(0, 0, 255),3);
+					}
+				}
+				cv::imshow("drawing", drawing);
+				cv::waitKey(0);
+			}
+		}
+		///////////////////////////////////////////////////
+
+		//ManualIntersector::PointVectorSet pointVectorSet = resultVectorSet;
+		ManualIntersector::PointVectorSet pointVectorSet = intersectorH.GetPointVectorSet();
 
 		cv::Size2f dstGridSize(50, 50);
 		cv::Size dstGridCount(pointVectorSet.front().size(), pointVectorSet.size());
 
 		// PERSPECTIVE
-		if (false)
+		if (true)
 		{
 			std::vector<std::vector<cv::Point2f>> srcQuads;
 			std::vector<cv::Rect> dstRects;
@@ -87,7 +114,7 @@ int main()
 			cv::imshow("part", dst);
 			cv::waitKey(0);
 
-			cv::imwrite(intersector.GetFilePathNoExtension() + "_Persp.jpg", dst);
+			cv::imwrite(intersectorH.GetFilePathNoExtension() + "_Persp.jpg", dst);
 		}
 
 		// THIN PLATE SPLINE
@@ -114,4 +141,50 @@ int main()
 		}
 	}
 
+}
+
+cv::Point GetVectorSetsIntersection(std::vector<cv::Point> horizontalVec, std::vector<cv::Point> verticalVec)
+{
+	for (int v = 0; v < verticalVec.size() - 1; v++)
+	{
+		int vMinX = min(verticalVec[v].x, verticalVec[v + 1].x);
+		int vMaxX = max(verticalVec[v].x, verticalVec[v + 1].x);
+		int vMinY = min(verticalVec[v].y, verticalVec[v + 1].y);
+		int vMaxY = max(verticalVec[v].y, verticalVec[v + 1].y);
+		for (int h = 0; h < horizontalVec.size() - 1; h++)
+		{
+			int hMinX = min(horizontalVec[h].x, horizontalVec[h + 1].x);
+			int hMaxX = max(horizontalVec[h].x, horizontalVec[h + 1].x);
+			int hMinY = min(horizontalVec[h].y, horizontalVec[h + 1].y);
+			int hMaxY = max(horizontalVec[h].y, horizontalVec[h + 1].y);
+			
+			if (hMaxX < vMaxX || hMinX > vMaxX || hMaxY < vMinY || hMinY > vMaxY)
+				continue;
+
+			float aV = (float)(verticalVec[v + 1].y - verticalVec[v].y) / (verticalVec[v + 1].x - verticalVec[v].x);
+			float bV = (float)verticalVec[v].y - aV * verticalVec[v].x;
+			float aH = (float)(horizontalVec[h+1].y - horizontalVec[h].y) / (horizontalVec[h+1].x - horizontalVec[h].x);
+			float bH = (float)horizontalVec[h].y - aH * horizontalVec[h].x;
+
+			float x = (bV - bH) / (aH - aV);
+			return cv::Point(x, aH * x + bH);
+		}
+	}
+
+	return cv::Point();
+}
+
+std::vector<std::vector<cv::Point>> GetVectorSetsIntersection(std::vector<std::vector<cv::Point>> horizontalSet, std::vector<std::vector<cv::Point>> verticalSet)
+{
+	ManualIntersector::PointVectorSet resultSet;
+	for (int h = 0; h < horizontalSet.size(); h++)
+	{
+		resultSet.push_back(std::vector<cv::Point>());
+		for (int v = 0; v < verticalSet.size(); v++)
+		{
+			resultSet[h].push_back(GetVectorSetsIntersection(horizontalSet[h], verticalSet[v]));
+		}
+	}
+
+	return resultSet;
 }

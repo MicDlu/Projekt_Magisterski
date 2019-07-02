@@ -159,6 +159,7 @@
   <ItemGroup>
     <ClInclude Include="..\Projekt_Magisterski\ManualIntersector.h" />
     <ClInclude Include="CThinPlateSpline.h" />
+    <ClInclude Include="Notebook_Dewarper.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

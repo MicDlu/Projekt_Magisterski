@@ -18,6 +18,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
+#include "Notebook_Dewarper.h"
 #include "../Projekt_Magisterski/ManualIntersector.h"
 #include "CThinPlateSpline.h"
 
