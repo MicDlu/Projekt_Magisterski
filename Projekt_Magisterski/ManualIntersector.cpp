@@ -8,7 +8,17 @@ ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSiz
 	cv::resize(inputImage, this->fixedImage, interfaceSize);
 	this->sizeFactor.width = (float)this->inputImage.size().width / interfaceSize.width;
 	this->sizeFactor.height = (float)this->inputImage.size().height / interfaceSize.height;
-	pointVectorSet.clear();
+	this->pointVectorSet.clear();
+}
+
+ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSize, PointVectorSet parsedVectorSet)
+{
+	this->imagePath = imagePath;
+	this->inputImage = cv::imread(imagePath);
+	cv::resize(inputImage, this->fixedImage, interfaceSize);
+	this->sizeFactor.width = (float)this->inputImage.size().width / interfaceSize.width;
+	this->sizeFactor.height = (float)this->inputImage.size().height / interfaceSize.height;
+	this->pointVectorSet = parsedVectorSet;
 }
 
 ManualIntersector::~ManualIntersector()
@@ -47,10 +57,10 @@ void ManualIntersector::OnMouseEvent(int event, int x, int y, int flags, void * 
 	case cv::MouseEventTypes::EVENT_MBUTTONUP:
 		manualIntersector->InitNewLine();
 		break;
-		default:
+	default:
 		break;
 	}
-	cv::imshow(manualIntersector->windowName, manualIntersector->GetDrawing(true));
+	cv::imshow(manualIntersector->windowName, manualIntersector->GetLinearDrawing(true));
 	cv::waitKey(1);
 }
 
@@ -68,7 +78,7 @@ void ManualIntersector::UndoPoint()
 {
 	if (pointVectorSet.back().size())
 		pointVectorSet.back().pop_back();
-	else
+	else if (pointVectorSet.size() > 1)
 		pointVectorSet.pop_back();
 }
 
@@ -77,7 +87,7 @@ void ManualIntersector::InitNewLine()
 	pointVectorSet.push_back(std::vector<cv::Point>());
 }
 
-cv::Mat ManualIntersector::GetDrawing(bool highlightLast)
+cv::Mat ManualIntersector::GetLinearDrawing(bool highlightLast)
 {
 	cv::Mat drawing = fixedImage.clone();
 	cv::Scalar color;
@@ -92,6 +102,25 @@ cv::Mat ManualIntersector::GetDrawing(bool highlightLast)
 			if (iP)
 				cv::line(drawing, pointVectorSet[iL][iP], pointVectorSet[iL][iP-1],color);
 			cv::circle(drawing, pointVectorSet[iL][iP], 0, color, 3);
+		}
+	}
+	return drawing;
+}
+
+cv::Mat ManualIntersector::GetArrayedDrawing()
+{
+	cv::Mat drawing = fixedImage.clone();
+	cv::Scalar color(0, 0, 255);
+	for (int iL = 0; iL < pointVectorSet.size(); iL++)
+	{
+		for (int iP = 0; iP < pointVectorSet[iL].size(); iP++)
+		{
+			if (iL)
+				cv::line(drawing, pointVectorSet[iL][iP], pointVectorSet[iL - 1][iP], color);
+			if (iP)
+				cv::line(drawing, pointVectorSet[iL][iP], pointVectorSet[iL][iP - 1], color);
+			cv::circle(drawing, pointVectorSet[iL][iP], 0, color, 3);
+
 		}
 	}
 	return drawing;

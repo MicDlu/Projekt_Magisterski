@@ -13,7 +13,7 @@ int main()
 	if (intersectorH.LoadImageDescription("_H"))
 	{
 		ManualIntersector::PointVectorSet pointVectorSetH = intersectorH.GetPointVectorSet();
-		cv::imshow("Drawing H", intersectorH.GetDrawing(false));
+		cv::imshow("Drawing H", intersectorH.GetLinearDrawing(false));
 
 		ManualIntersector::PointVectorSet resultVectorSet;
 		if (true)
@@ -22,7 +22,7 @@ int main()
 			if (intersectorV.LoadImageDescription("_V"))
 			{
 				ManualIntersector::PointVectorSet pointVectorSetV = intersectorV.GetPointVectorSet();
-				cv::imshow("Drawing V", intersectorV.GetDrawing(false));
+				cv::imshow("Drawing V", intersectorV.GetLinearDrawing(false));
 				resultVectorSet = GetVectorSetsIntersection(pointVectorSetH, pointVectorSetV);
 
 				cv::Mat drawing = cv::imread(jpgFilePath);

@@ -36,11 +36,13 @@ private:
 	void TranslateToOriginal(cv::Point &point);
 	void TranslateToProjection(cv::Point & point);
 public:
-	ManualIntersector(cv::String filePath, cv::Size interfaceSize);
+	ManualIntersector(cv::String imagePath, cv::Size interfaceSize);
+	ManualIntersector(cv::String imagePath, cv::Size interfaceSize, PointVectorSet parsedVectorSet);
 	~ManualIntersector();
 	void RunSelector(std::string title);
 	PointVectorSet GetPointVectorSet();
-	cv::Mat GetDrawing(bool highlightLast);
+	cv::Mat GetLinearDrawing(bool highlightLast);
+	cv::Mat GetArrayedDrawing();
 	bool SaveFileDescription(std::string &filePathRef, std::string fileNameSuffix = "");
 	bool LoadImageDescription(std::string fileNameSuffix = "");
 	std::string GetFilePathNoExtension();

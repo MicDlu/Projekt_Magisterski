@@ -38,8 +38,11 @@ int main()
 
 	std::string filePath;
 	std::string descriptionPath;
+
 	while (OpenJpgFile(filePath))
 	{
+		cv::Mat drawing = cv::imread(filePath);
+		cv::resize(drawing, drawing, windowSize);
 		std::cout << std::endl << "Wczytano plik: " << filePath << std::endl;
 
 		ManualIntersector intersectorH(filePath, windowSize);
@@ -53,16 +56,11 @@ int main()
 		std::cout << "Zapisano definicje pionowa: " << descriptionPath << std::endl;
 
 		ManualIntersector::PointVectorSet resultVectorSet = GetVectorSetsIntersection(intersectorH.GetPointVectorSet(), intersectorV.GetPointVectorSet());
-		cv::Mat drawing = cv::imread(filePath);
-		cv::resize(drawing, drawing, windowSize);
-		for (std::vector<cv::Point> line : resultVectorSet)
-		{
-			for (cv::Point point : line)
-			{
-				cv::circle(drawing, point, 2, cv::Scalar(0, 0, 255), 3);
-			}
-		}
-		cv::imshow("drawing", drawing);
+		ManualIntersector intersectorX(filePath, windowSize, resultVectorSet);
+		cv::imshow("Drawing X", intersectorX.GetArrayedDrawing());
+		intersectorX.SaveFileDescription(descriptionPath, "_X");
+		std::cout << "Zapisano definicje polaczona: " << descriptionPath << std::endl;
+
 		key = cv::waitKey(0);
 		if (key == '27')
 			break;

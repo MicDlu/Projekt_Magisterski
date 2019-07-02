@@ -22,7 +22,7 @@ int main()
 
 			//LOAD
 			intersector.LoadImageDescription("_H");
-			cv::imshow("loaded", intersector.GetDrawing(false));
+			cv::imshow("loaded", intersector.GetLinearDrawing(false));
 			cv::waitKey(0);
 			continue;
 
