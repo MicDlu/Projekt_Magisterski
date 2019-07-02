@@ -41,15 +41,82 @@ int main()
 	while (OpenJpgFile(filePath))
 	{
 		std::cout << std::endl << "Wczytano plik: " << filePath << std::endl;
-		ManualIntersector intersector(filePath, windowSize);
-		intersector.RunSelector("poziomo");
-		intersector.SaveFileDescription(descriptionPath,"_H");
-		std::cout << "Zapisano definicje: " << descriptionPath << std::endl;
-		intersector.RunSelector("pionowo");
-		intersector.SaveFileDescription(descriptionPath,"_V");
-		std::cout << "Zapisano definicje: " << descriptionPath << std::endl;
-		system("pause");
+
+		ManualIntersector intersectorH(filePath, windowSize);
+		intersectorH.RunSelector("poziomo");
+		intersectorH.SaveFileDescription(descriptionPath,"_H");
+		std::cout << "Zapisano definicje poziomo: " << descriptionPath << std::endl;
+
+		ManualIntersector intersectorV(filePath, windowSize);
+		intersectorV.RunSelector("pionowo");
+		intersectorV.SaveFileDescription(descriptionPath,"_V");
+		std::cout << "Zapisano definicje pionowa: " << descriptionPath << std::endl;
+
+		ManualIntersector::PointVectorSet resultVectorSet = GetVectorSetsIntersection(intersectorH.GetPointVectorSet(), intersectorV.GetPointVectorSet());
+		cv::Mat drawing = cv::imread(filePath);
+		cv::resize(drawing, drawing, windowSize);
+		for (std::vector<cv::Point> line : resultVectorSet)
+		{
+			for (cv::Point point : line)
+			{
+				cv::circle(drawing, point, 2, cv::Scalar(0, 0, 255), 3);
+			}
+		}
+		cv::imshow("drawing", drawing);
+		key = cv::waitKey(0);
+		if (key == '27')
+			break;
+		//system("pause");
 	}
 	std::cout << std::endl << "Dzieki za pomoc <3" << std::endl;
 	system("pause");
+}
+
+cv::Point GetVectorSetsIntersection(std::vector<cv::Point> horizontalVec, std::vector<cv::Point> verticalVec)
+{
+	for (int v = 0; v < verticalVec.size() - 1; v++)
+	{
+		int vMinX = std::min(verticalVec[v].x, verticalVec[v + 1].x);
+		int vMaxX = std::max(verticalVec[v].x, verticalVec[v + 1].x);
+		int vMinY = std::min(verticalVec[v].y, verticalVec[v + 1].y);
+		int vMaxY = std::max(verticalVec[v].y, verticalVec[v + 1].y);
+		for (int h = 0; h < horizontalVec.size() - 1; h++)
+		{
+			int hMinX = std::min(horizontalVec[h].x, horizontalVec[h + 1].x);
+			int hMaxX = std::max(horizontalVec[h].x, horizontalVec[h + 1].x);
+			int hMinY = std::min(horizontalVec[h].y, horizontalVec[h + 1].y);
+			int hMaxY = std::max(horizontalVec[h].y, horizontalVec[h + 1].y);
+
+			if (hMaxX < vMaxX || hMinX > vMaxX || hMaxY < vMinY || hMinY > vMaxY)
+				continue;
+
+			float aV = (float)(verticalVec[v + 1].y - verticalVec[v].y) / (verticalVec[v + 1].x - verticalVec[v].x);
+			float bV = (float)verticalVec[v].y - aV * verticalVec[v].x;
+			float aH = (float)(horizontalVec[h + 1].y - horizontalVec[h].y) / (horizontalVec[h + 1].x - horizontalVec[h].x);
+			float bH = (float)horizontalVec[h].y - aH * horizontalVec[h].x;
+
+			float x = (bV - bH) / (aH - aV);
+			return cv::Point(x, aH * x + bH);
+		}
+	}
+
+	return cv::Point();
+}
+
+std::vector<std::vector<cv::Point>> GetVectorSetsIntersection(std::vector<std::vector<cv::Point>> horizontalSet, std::vector<std::vector<cv::Point>> verticalSet)
+{
+	ManualIntersector::PointVectorSet resultSet;
+	for (int h = 0; h < horizontalSet.size(); h++)
+	{
+		resultSet.push_back(std::vector<cv::Point>());
+		for (int v = 0; v < verticalSet.size(); v++)
+		{
+			cv::Point point = GetVectorSetsIntersection(horizontalSet[h], verticalSet[v]);
+			if (point.x == 0)
+				break;
+			resultSet[h].push_back(point);
+		}
+	}
+
+	return resultSet;
 }

@@ -11,6 +11,7 @@
 #include <opencv2/imgproc.hpp>
 #include <opencv2/opencv.hpp>
 
+#include "Manual_Selector.h"
 #include "../Projekt_Magisterski/ManualIntersector.h"
 
 #endif //PCH_H
