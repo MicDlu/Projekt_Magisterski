@@ -40,8 +40,8 @@ int main()
 		}
 		///////////////////////////////////////////////////
 
-		//ManualIntersector::PointVectorSet pointVectorSet = resultVectorSet;
-		ManualIntersector::PointVectorSet pointVectorSet = intersectorH.GetPointVectorSet();
+		ManualIntersector::PointVectorSet pointVectorSet = resultVectorSet;
+		//ManualIntersector::PointVectorSet pointVectorSet = intersectorH.GetPointVectorSet();
 
 		cv::Size2f dstGridSize(50, 50);
 		cv::Size dstGridCount(pointVectorSet.front().size(), pointVectorSet.size());
@@ -53,7 +53,7 @@ int main()
 			std::vector<cv::Rect> dstRects;
 			for (int iL = 0; iL <= pointVectorSet.size() - 2; iL++)
 			{
-				for (int iP = 0; iP <= pointVectorSet[iL].size() - 2; iP++)
+				for (int iP = 0; iP <= pointVectorSet[iL].size() - 2 && iP <= pointVectorSet[iL+1].size() - 2; iP++)
 				{
 					std::vector<cv::Point2f> srcQuad;
 					srcQuad.push_back(pointVectorSet[iL][iP]);
@@ -80,11 +80,11 @@ int main()
 				src = cv::imread(jpgFilePath);
 				cv::resize(src, src, IMAGE_SIZE_SVGA);
 
-				int margin = 30;
 				int minX = min(srcQuads[i][0].x, srcQuads[i][3].x);
 				int maxX = max(srcQuads[i][2].x, srcQuads[i][1].x);
 				int minY = min(srcQuads[i][0].y, srcQuads[i][1].y);
 				int maxY = max(srcQuads[i][3].y, srcQuads[i][2].y);
+				int margin = 20 % min(src.cols- maxX, src.rows - maxY);
 				cv::Rect roiRect(cv::Point(minX - margin, minY - margin), cv::Point(maxX + margin, maxY + margin));
 				cv::Mat roi = src(roiRect);
 				//cv::imshow("roi", roi);
@@ -182,7 +182,10 @@ std::vector<std::vector<cv::Point>> GetVectorSetsIntersection(std::vector<std::v
 		resultSet.push_back(std::vector<cv::Point>());
 		for (int v = 0; v < verticalSet.size(); v++)
 		{
-			resultSet[h].push_back(GetVectorSetsIntersection(horizontalSet[h], verticalSet[v]));
+			cv::Point point = GetVectorSetsIntersection(horizontalSet[h], verticalSet[v]);
+			if (point.x == 0)
+				break;
+			resultSet[h].push_back(point);
 		}
 	}
 
