@@ -42,7 +42,7 @@ public:
 	void RunSelector(std::string title);
 	PointVectorSet GetPointVectorSet();
 	cv::Mat GetLinearDrawing(bool highlightLast);
-	cv::Mat GetArrayedDrawing();
+	cv::Mat GetGridDrawing();
 	bool SaveFileDescription(std::string &filePathRef, std::string fileNameSuffix = "");
 	bool LoadImageDescription(std::string fileNameSuffix = "");
 	std::string GetFilePathNoExtension();

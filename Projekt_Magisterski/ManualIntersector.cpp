@@ -107,7 +107,7 @@ cv::Mat ManualIntersector::GetLinearDrawing(bool highlightLast)
 	return drawing;
 }
 
-cv::Mat ManualIntersector::GetArrayedDrawing()
+cv::Mat ManualIntersector::GetGridDrawing()
 {
 	cv::Mat drawing = fixedImage.clone();
 	cv::Scalar color(0, 0, 255);
@@ -115,7 +115,7 @@ cv::Mat ManualIntersector::GetArrayedDrawing()
 	{
 		for (int iP = 0; iP < pointVectorSet[iL].size(); iP++)
 		{
-			if (iL)
+			if (iL && iP < pointVectorSet[iL-1].size())
 				cv::line(drawing, pointVectorSet[iL][iP], pointVectorSet[iL - 1][iP], color);
 			if (iP)
 				cv::line(drawing, pointVectorSet[iL][iP], pointVectorSet[iL][iP - 1], color);

@@ -57,7 +57,7 @@ int main()
 
 		ManualIntersector::PointVectorSet resultVectorSet = GetVectorSetsIntersection(intersectorH.GetPointVectorSet(), intersectorV.GetPointVectorSet());
 		ManualIntersector intersectorX(filePath, windowSize, resultVectorSet);
-		cv::imshow("Drawing X", intersectorX.GetArrayedDrawing());
+		cv::imshow("Drawing X", intersectorX.GetGridDrawing());
 		intersectorX.SaveFileDescription(descriptionPath, "_X");
 		std::cout << "Zapisano definicje polaczona: " << descriptionPath << std::endl;
 
