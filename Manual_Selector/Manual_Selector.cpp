@@ -57,9 +57,12 @@ int main()
 
 		ManualIntersector::PointVectorSet resultVectorSet = GetVectorSetsIntersection(intersectorH.GetPointVectorSet(), intersectorV.GetPointVectorSet());
 		ManualIntersector intersectorX(filePath, windowSize, resultVectorSet);
-		cv::imshow("Drawing X", intersectorX.GetGridDrawing());
+		cv::Mat gridDrawing = intersectorX.GetGridDrawing();
+		cv::imshow("Drawing X", gridDrawing);
 		intersectorX.SaveFileDescription(descriptionPath, "_X");
 		std::cout << "Zapisano definicje polaczona: " << descriptionPath << std::endl;
+		cv::imwrite(intersectorX.GetFilePathNoExtension() + "_X.jpg",gridDrawing);
+		std::cout << "Zapisano obraz siatki: " << descriptionPath << std::endl;
 
 		key = cv::waitKey(0);
 		if (key == '27')
