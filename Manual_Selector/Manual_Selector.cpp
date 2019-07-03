@@ -63,11 +63,8 @@ int main()
 		std::cout << "Zapisano definicje polaczona: " << descriptionPath << std::endl;
 		cv::imwrite(intersectorX.GetFilePathNoExtension() + "_X.jpg",gridDrawing);
 		std::cout << "Zapisano obraz siatki: " << descriptionPath << std::endl;
-
-		key = cv::waitKey(0);
-		if (key == '27')
-			break;
-		//system("pause");
+		while (cv::waitKey(0) != 27);
+		cv::destroyAllWindows();
 	}
 	std::cout << std::endl << "Dzieki za pomoc <3" << std::endl;
 	system("pause");

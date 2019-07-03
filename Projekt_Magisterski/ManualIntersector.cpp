@@ -29,10 +29,12 @@ void ManualIntersector::RunSelector(std::string titlePrefix)
 {
 	this->windowName = titlePrefix + (titlePrefix.empty()?"":" - ") + this->imagePath;
 	cv::namedWindow(windowName, 1);
+	cv::imshow(windowName, this->fixedImage);
+	cv::waitKey(1);
 	cv::setMouseCallback(windowName,OnMouseEvent,this);
 	this->pointVectorSet.clear();
 	InitNewLine();
-	cv::waitKey(0);
+	while (cv::waitKey(0) != 27);
 	cv::destroyWindow(windowName);
 	if (pointVectorSet.back().size() == 0)
 		pointVectorSet.pop_back();
