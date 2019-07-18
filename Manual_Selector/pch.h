@@ -6,7 +6,6 @@
 #define SCALAR_GREEN cv::Scalar(0,255,0)
 
 #include <iostream>
-#include <numeric>
 #include <math.h>
 #include <windows.h>
 

@@ -39,6 +39,12 @@ int main()
 	std::string filePath;
 	std::string descriptionPath;
 
+	std::cout << "*************************" << std::endl;
+	std::cout << "LPM - zaznacz" << std::endl;
+	std::cout << "SPM - zakoncz" << std::endl;
+	std::cout << "PPM - cofnij" << std::endl;
+	std::cout << "*************************" << std::endl;
+	
 	while (OpenJpgFile(filePath))
 	{
 		cv::Mat drawing = cv::imread(filePath);
@@ -62,7 +68,7 @@ int main()
 		intersectorX.SaveFileDescription(descriptionPath, "_X");
 		std::cout << "Zapisano definicje polaczona: " << descriptionPath << std::endl;
 		cv::imwrite(intersectorX.GetFilePathNoExtension() + "_X.jpg",gridDrawing);
-		std::cout << "Zapisano obraz siatki: " << descriptionPath << std::endl;
+		std::cout << "Zapisano obraz siatki: " << intersectorX.GetFilePathNoExtension() + "_X.jpg" << std::endl;
 		while (cv::waitKey(0) != 27);
 		cv::destroyAllWindows();
 	}

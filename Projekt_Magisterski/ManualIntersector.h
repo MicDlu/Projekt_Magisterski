@@ -9,6 +9,7 @@
 #define IMAGE_SIZE_PAL cv::Size(1024,576)
 #define IMAGE_SIZE_HD720 cv::Size(1280,720)
 #define IMAGE_SIZE_HD1080 cv::Size(1920,1080)
+#define IMAGE_SIZE IMAGE_SIZE_HD1080
 
 bool OpenJpgFile(std::string &filePath);
 

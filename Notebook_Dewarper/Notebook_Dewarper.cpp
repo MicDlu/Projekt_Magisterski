@@ -1,3 +1,5 @@
+#include "..\Projekt_Magisterski\Projekt_Magisterski.h"
+#include "..\Projekt_Magisterski\Projekt_Magisterski.h"
 // Notebook_Dewarper.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 
@@ -6,141 +8,129 @@
 
 int main()
 {
-    std::cout << "Hello World!\n";
+
 	std::string jpgFilePath;
-	OpenJpgFile(jpgFilePath);
+	while (OpenJpgFile(jpgFilePath))
+	{
+		ManualIntersector intersectorX(jpgFilePath, IMAGE_SIZE);
+		if (!intersectorX.LoadImageDescription("_X"))
+			ParseHVtoX(jpgFilePath);
+
+		if (intersectorX.LoadImageDescription("_X"))
+		{
+			ManualIntersector::PointVectorSet pointVectorSet = intersectorX.GetPointVectorSet();
+			cv::Mat scaledGridDrawing;
+			cv::resize(intersectorX.GetGridDrawing(), scaledGridDrawing, IMAGE_SIZE_SVGA);
+			cv::imshow("Obraz siatki: " + jpgFilePath, scaledGridDrawing);
+			cv::waitKey(1);
+
+			// SRC GRID CALCULATIONS
+			cv::Size2f dstGridSize(25, 25);
+			int maxPointVectorWidth = pointVectorSet.front().size();
+			for (std::vector<cv::Point> pointVector : pointVectorSet)
+			{
+				if (pointVector.size() > maxPointVectorWidth)
+					maxPointVectorWidth = pointVector.size();
+			}
+			cv::Size dstGridCount(maxPointVectorWidth - 1, pointVectorSet.size() - 1);
+
+			// PERSPECTIVE
+			if (true)
+			{
+				std::cout << "Przetwarzanie siatki: " << jpgFilePath << std::endl;
+
+				// CALC GRID SRC/DST QUADLITERALS
+				std::vector<std::vector<cv::Point2f>> srcQuads;
+				std::vector<cv::Rect> dstRects;
+				for (int iL = 0; iL <= pointVectorSet.size() - 2; iL++)
+				{
+					for (int iP = 0; iP <= pointVectorSet[iL].size() - 2 && iP <= pointVectorSet[iL + 1].size() - 2; iP++)
+					{
+						std::vector<cv::Point2f> srcQuad;
+						srcQuad.push_back(pointVectorSet[iL][iP]);
+						srcQuad.push_back(pointVectorSet[iL][iP + 1]);
+						srcQuad.push_back(pointVectorSet[iL + 1][iP + 1]);
+						srcQuad.push_back(pointVectorSet[iL + 1][iP]);
+						srcQuads.push_back(srcQuad);
+
+						dstRects.push_back(cv::Rect(iP*dstGridSize.width, iL*dstGridSize.height, dstGridSize.width, dstGridSize.height));
+					}
+				}
+
+				// DST GRID SIZE
+				std::vector<cv::Point2f> dstQuad;
+				dstQuad.push_back(cv::Point(0, 0));
+				dstQuad.push_back(cv::Point(dstGridSize.width, 0));
+				dstQuad.push_back(cv::Point(dstGridSize.width, dstGridSize.height));
+				dstQuad.push_back(cv::Point(0, dstGridSize.height));
+				cv::Rect gridRect(dstQuad[0], dstQuad[2]);
+
+				// READ SRC / CREATE DST
+				cv::Mat src = cv::imread(jpgFilePath);
+				cv::resize(src, src, IMAGE_SIZE);
+				cv::Mat dst = cv::Mat::zeros(cv::Size(dstGridSize.width*dstGridCount.width + 1, dstGridSize.height*dstGridCount.height), src.type());
+
+				for (int i = 0; i < srcQuads.size(); i++)
+				{
+					//std::cout << "Przetwarzanie " << i << " / " << srcQuads.size() << std::endl;
+					cv::Mat srcCopy = src;
+
+					// CALC GRID TRANSFORM
+					cv::Mat dstPart;
+					cv::Mat transform = cv::getPerspectiveTransform(srcQuads[i], dstQuad);
+					cv::warpPerspective(src, dstPart, transform, IMAGE_SIZE);
+
+					// CROP GRID AREA					
+					dstPart(gridRect).copyTo(dst(dstRects[i]));
+
+					cv::imshow("part", dst);
+					cv::waitKey(1);
+				}
+
+				//cv::imshow("part", dst);
+				//cv::waitKey(0);
+
+				cv::imwrite(intersectorX.GetFilePathNoExtension() + "_P.jpg", dst);
+				std::cout << "Zapisano przetworzony obraz: " << intersectorX.GetFilePathNoExtension() + "_P.jpg" << std::endl;
+				system("pause");
+			}
+
+		}
+		else
+		{
+			std::cout << "Nie uda³o siê wczytac definicji siatki (_X / _H+_V): " << jpgFilePath << std::endl;
+			system("pause");
+		}
+	}
+	std::cout << std::endl << "Dzieki za pomoc <3" << std::endl;
+	system("pause");
+}
+
+bool ParseHVtoX(std::string &jpgFilePath)
+{
 	ManualIntersector intersectorH(jpgFilePath, IMAGE_SIZE_SVGA);
 	if (intersectorH.LoadImageDescription("_H"))
 	{
 		ManualIntersector::PointVectorSet pointVectorSetH = intersectorH.GetPointVectorSet();
-		cv::imshow("Drawing H", intersectorH.GetLinearDrawing(false));
 
-		ManualIntersector::PointVectorSet resultVectorSet;
-		if (true)
+		ManualIntersector intersectorV(jpgFilePath, IMAGE_SIZE_SVGA);
+		if (intersectorV.LoadImageDescription("_V"))
 		{
-			ManualIntersector intersectorV(jpgFilePath, IMAGE_SIZE_SVGA);
-			if (intersectorV.LoadImageDescription("_V"))
-			{
-				ManualIntersector::PointVectorSet pointVectorSetV = intersectorV.GetPointVectorSet();
-				cv::imshow("Drawing V", intersectorV.GetLinearDrawing(false));
-				resultVectorSet = GetVectorSetsIntersection(pointVectorSetH, pointVectorSetV);
+			ManualIntersector::PointVectorSet pointVectorSetV = intersectorV.GetPointVectorSet();
+			ManualIntersector::PointVectorSet pointVectorSetX = GetVectorSetsIntersection(pointVectorSetH, pointVectorSetV);
 
-				cv::Mat drawing = cv::imread(jpgFilePath);
-				cv::resize(drawing, drawing, IMAGE_SIZE_SVGA);
-				for (std::vector<cv::Point> line : resultVectorSet)
-				{
-					for (cv::Point point : line)
-					{
-						cv::circle(drawing, point, 2, cv::Scalar(0, 0, 255),3);
-					}
-				}
-				cv::imshow("drawing", drawing);
-				cv::waitKey(0);
-			}
-		}
-		///////////////////////////////////////////////////
-
-		ManualIntersector::PointVectorSet pointVectorSet = resultVectorSet;
-		//ManualIntersector::PointVectorSet pointVectorSet = intersectorH.GetPointVectorSet();
-
-		cv::Size2f dstGridSize(50, 50);
-		cv::Size dstGridCount(pointVectorSet.front().size(), pointVectorSet.size());
-
-		// PERSPECTIVE
-		if (true)
-		{
-			std::vector<std::vector<cv::Point2f>> srcQuads;
-			std::vector<cv::Rect> dstRects;
-			for (int iL = 0; iL <= pointVectorSet.size() - 2; iL++)
-			{
-				for (int iP = 0; iP <= pointVectorSet[iL].size() - 2 && iP <= pointVectorSet[iL+1].size() - 2; iP++)
-				{
-					std::vector<cv::Point2f> srcQuad;
-					srcQuad.push_back(pointVectorSet[iL][iP]);
-					srcQuad.push_back(pointVectorSet[iL][iP+1]);
-					srcQuad.push_back(pointVectorSet[iL+1][iP+1]);
-					srcQuad.push_back(pointVectorSet[iL+1][iP]);
-					srcQuads.push_back(srcQuad);
-
-					dstRects.push_back(cv::Rect(iP*dstGridSize.width, iL*dstGridSize.height, dstGridSize.width, dstGridSize.height));
-				}
-			}
-			
-			cv::Mat src = cv::imread(jpgFilePath);
-			cv::Mat dst = cv::Mat::zeros(cv::Size(dstGridSize.width*dstGridCount.width-1, dstGridSize.height*dstGridCount.height-2), src.type());
-
-			std::vector<cv::Point2f> dstQuad;
-			dstQuad.push_back(cv::Point(0, 0));
-			dstQuad.push_back(cv::Point(dstGridSize.width, 0));
-			dstQuad.push_back(cv::Point(dstGridSize.width, dstGridSize.height));
-			dstQuad.push_back(cv::Point(0, dstGridSize.height));
-
-			for (int i = 0; i < srcQuads.size(); i++)
-			{
-				src = cv::imread(jpgFilePath);
-				cv::resize(src, src, IMAGE_SIZE_SVGA);
-
-				int minX = min(srcQuads[i][0].x, srcQuads[i][3].x);
-				int maxX = max(srcQuads[i][2].x, srcQuads[i][1].x);
-				int minY = min(srcQuads[i][0].y, srcQuads[i][1].y);
-				int maxY = max(srcQuads[i][3].y, srcQuads[i][2].y);
-				int margin = 20 % min(src.cols- maxX, src.rows - maxY);
-				cv::Rect roiRect(cv::Point(minX - margin, minY - margin), cv::Point(maxX + margin, maxY + margin));
-				cv::Mat roi = src(roiRect);
-				//cv::imshow("roi", roi);
-				//cv::waitKey(0);
-
-				std::vector<cv::Point2f> roiSrcQuad = srcQuads[i];
-				for (int r = 0; r < roiSrcQuad.size(); r++)
-				{
-					roiSrcQuad[r].x -= minX - margin;
-					roiSrcQuad[r].y -= minY - margin;
-				}
-
-
-				cv::Mat dstPart;
-				cv::Mat transform = cv::getPerspectiveTransform(roiSrcQuad, dstQuad);
-				cv::warpPerspective(roi, dstPart, transform, IMAGE_SIZE_SVGA);
-
-				cv::Rect rect(dstQuad[0], dstQuad[2]);
-				dstPart = dstPart(rect);
-
-				dstPart.copyTo(dst(dstRects[i]));
-
-				//cv::imshow("part", dst);
-				//cv::waitKey(0);
-			}
-
-			cv::imshow("part", dst);
-			cv::waitKey(0);
-
-			cv::imwrite(intersectorH.GetFilePathNoExtension() + "_Persp.jpg", dst);
-		}
-
-		// THIN PLATE SPLINE
-		if (false)
-		{
-			std::vector<cv::Point> srcPts, dstPts;
-			for (int iL = 0; iL < pointVectorSet.size(); iL++)
-			{
-				for (int iP = 0; iP < pointVectorSet[iL].size(); iP++)
-				{
-					srcPts.push_back(pointVectorSet[iL][iP]);
-					dstPts.push_back(cv::Point(iP*dstGridSize.width, iL*dstGridSize.height));
-				}
-			}
-			CThinPlateSpline tps(srcPts, dstPts);
-
-			cv::Mat	src = cv::imread(jpgFilePath);
-			cv::Mat dst;
-			tps.warpImage(src, dst, 0.05, INTER_CUBIC, BACK_WARP);
-
-			cv::imshow("original", src);
-			cv::imshow("distorted", dst);
-			cv::waitKey(0);
+			ManualIntersector intersectorX(jpgFilePath, IMAGE_SIZE_SVGA, pointVectorSetX);
+			cv::Mat gridDrawing = intersectorX.GetGridDrawing();
+			cv::imshow("Drawing X", gridDrawing);
+			std::string descriptionPath;
+			intersectorX.SaveFileDescription(descriptionPath, "_X");
+			std::cout << "Zapisano definicje polaczona: " << descriptionPath << std::endl;
+			cv::imwrite(intersectorX.GetFilePathNoExtension() + "_X.jpg", gridDrawing);
+			std::cout << "Zapisano obraz siatki: " << intersectorX.GetFilePathNoExtension() + "_X.jpg" << std::endl;
+			return true;
 		}
 	}
-
+	return false;
 }
 
 cv::Point GetVectorSetsIntersection(std::vector<cv::Point> horizontalVec, std::vector<cv::Point> verticalVec)

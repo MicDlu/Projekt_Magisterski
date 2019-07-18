@@ -86,7 +86,8 @@ void ManualIntersector::UndoPoint()
 
 void ManualIntersector::InitNewLine()
 {
-	pointVectorSet.push_back(std::vector<cv::Point>());
+	if (pointVectorSet.empty() || !pointVectorSet.back().empty())
+		pointVectorSet.push_back(std::vector<cv::Point>());
 }
 
 cv::Mat ManualIntersector::GetLinearDrawing(bool highlightLast)
