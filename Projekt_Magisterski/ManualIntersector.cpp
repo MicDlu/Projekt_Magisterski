@@ -313,7 +313,6 @@ std::vector<std::vector<cv::Point>> GetVectorSetsIntersection(std::vector<std::v
 	return resultSet;
 }
 
-
 cv::Point GetVectorSetsIntersection(std::vector<cv::Point> horizontalVec, std::vector<cv::Point> verticalVec)
 {
 	for (int v = 0; v < verticalVec.size() - 1; v++)
@@ -329,18 +328,32 @@ cv::Point GetVectorSetsIntersection(std::vector<cv::Point> horizontalVec, std::v
 			int hMinY = std::min(horizontalVec[h].y, horizontalVec[h + 1].y);
 			int hMaxY = std::max(horizontalVec[h].y, horizontalVec[h + 1].y);
 
+			// SKIP IF NOT INTERSECTING
 			if (hMaxX < vMaxX || hMinX > vMaxX || hMaxY < vMinY || hMinY > vMaxY)
 				continue;
 
-			float aV = (float)(verticalVec[v + 1].y - verticalVec[v].y) / (verticalVec[v + 1].x - verticalVec[v].x);
-			float bV = (float)verticalVec[v].y - aV * verticalVec[v].x;
-			float aH = (float)(horizontalVec[h + 1].y - horizontalVec[h].y) / (horizontalVec[h + 1].x - horizontalVec[h].x);
-			float bH = (float)horizontalVec[h].y - aH * horizontalVec[h].x;
-
-			float x = (bV - bH) / (aH - aV);
-			return cv::Point(x, aH * x + bH);
+			if (verticalVec[v + 1].x == verticalVec[v].x)
+			{
+				float aH = (float)(horizontalVec[h + 1].y - horizontalVec[h].y) / (horizontalVec[h + 1].x - horizontalVec[h].x);
+				float bH = (float)horizontalVec[h].y - aH * horizontalVec[h].x;
+				float x = verticalVec[v].x;
+				float y = aH * x + bH;
+				return cv::Point(x, y);
+			}
+			else
+			{
+				// CALC LINE SEGMENTS PARAMS
+				float aV = (float)(verticalVec[v + 1].y - verticalVec[v].y) / (verticalVec[v + 1].x - verticalVec[v].x);
+				float bV = (float)verticalVec[v].y - aV * verticalVec[v].x;
+				float aH = (float)(horizontalVec[h + 1].y - horizontalVec[h].y) / (horizontalVec[h + 1].x - horizontalVec[h].x);
+				float bH = (float)horizontalVec[h].y - aH * horizontalVec[h].x;
+				// CALC INTERSECTION POINT
+				float x = (bV - bH) / (aH - aV);
+				float y = aH * x + bH;
+				return cv::Point(x, y);
+			}
+			
 		}
 	}
-
 	return cv::Point();
 }

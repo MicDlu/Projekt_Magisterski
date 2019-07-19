@@ -1,5 +1,3 @@
-#include "..\Projekt_Magisterski\Projekt_Magisterski.h"
-#include "..\Projekt_Magisterski\Projekt_Magisterski.h"
 // Notebook_Dewarper.cpp : This file contains the 'main' function. Program execution begins and ends there.
 //
 

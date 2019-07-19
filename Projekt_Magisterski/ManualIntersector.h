@@ -4,7 +4,6 @@
 #include <atlstr.h>
 #include <locale>
 #include <codecvt>
-#include <math.h>
 
 #define IMAGE_SIZE_SVGA cv::Size(800,600)
 #define IMAGE_SIZE_PAL cv::Size(1024,576)
@@ -14,8 +13,6 @@
 #define ZOOM_SIZE 40
 #define ZOOM_FACTOR 4
 #define ZOOM_WINDOW_SIZE ZOOM_SIZE * ZOOM_FACTOR
-
-bool OpenJpgFile(std::string &filePath);
 
 class ManualIntersector
 {
@@ -59,6 +56,8 @@ public:
 	std::string GetFilePathNoExtension();
 	PointVectorSet GetScaledVectorSet(float scale = 1);
 };
+
+bool OpenJpgFile(std::string &filePath);
 
 std::vector<std::vector<cv::Point>> GetVectorSetsIntersection(std::vector<std::vector<cv::Point>> horizontalSet, std::vector<std::vector<cv::Point>> verticalSet);
 
