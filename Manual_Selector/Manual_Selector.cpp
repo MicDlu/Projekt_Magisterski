@@ -7,6 +7,7 @@
 int main()
 {
 	std::cout << "Rozmiar okna:" << std::endl;
+	std::cout << "0. Oryginalny" << std::endl;
 	std::cout << "1. SVGA (" << IMAGE_SIZE_SVGA.width << "/" << IMAGE_SIZE_SVGA.height << ")" << std::endl;
 	std::cout << "2. PAL+ (" << IMAGE_SIZE_PAL.width << "/" << IMAGE_SIZE_PAL.height << ")" << std::endl;
 	std::cout << "3. HD720 (" << IMAGE_SIZE_HD720.width << "/" << IMAGE_SIZE_HD720.height << ")" << std::endl;
@@ -15,10 +16,13 @@ int main()
 	do
 	{
 		std::cin >> key;
-	} while (!(key == '1' || key == '2' || key == '3' || key == '4'));
+	} while (!(key == '0' || key == '1' || key == '2' || key == '3' || key == '4'));
 	cv::Size windowSize;
 	switch (key)
 	{
+	case '0':
+		std::cout << "Wybrano oryginalny rozmiar" << std::endl;
+		break;
 	case '1':
 		windowSize = IMAGE_SIZE_SVGA;
 		break;
@@ -34,21 +38,26 @@ int main()
 	default:
 		break;
 	}
-	std::cout << "Wybrano: " << windowSize.width << "/" << windowSize.height << std::endl;
+	if (key != 0)
+		std::cout << "Wybrano: " << windowSize.width << "/" << windowSize.height << std::endl;
 
 	std::string filePath;
 	std::string descriptionPath;
 
 	std::cout << "*************************" << std::endl;
-	std::cout << "LPM - zaznacz" << std::endl;
-	std::cout << "SPM - zakoncz" << std::endl;
-	std::cout << "PPM - cofnij" << std::endl;
+	std::cout << "LPM - Zaznacz punkt" << std::endl;
+	std::cout << "SPM - Zakoncz linie" << std::endl;
+	std::cout << "PPM - Cofnij" << std::endl;
+	std::cout << "ESC - Przejdz dalej" << std::endl;
 	std::cout << "*************************" << std::endl;
 	
 	while (OpenJpgFile(filePath))
 	{
 		cv::Mat drawing = cv::imread(filePath);
-		cv::resize(drawing, drawing, windowSize);
+		if (key != 0)
+			cv::resize(drawing, drawing, windowSize);
+		else
+			windowSize = drawing.size();
 		std::cout << std::endl << "Wczytano plik: " << filePath << std::endl;
 
 		ManualIntersector intersectorH(filePath, windowSize);
@@ -74,53 +83,4 @@ int main()
 	}
 	std::cout << std::endl << "Dzieki za pomoc <3" << std::endl;
 	system("pause");
-}
-
-cv::Point GetVectorSetsIntersection(std::vector<cv::Point> horizontalVec, std::vector<cv::Point> verticalVec)
-{
-	for (int v = 0; v < verticalVec.size() - 1; v++)
-	{
-		int vMinX = std::min(verticalVec[v].x, verticalVec[v + 1].x);
-		int vMaxX = std::max(verticalVec[v].x, verticalVec[v + 1].x);
-		int vMinY = std::min(verticalVec[v].y, verticalVec[v + 1].y);
-		int vMaxY = std::max(verticalVec[v].y, verticalVec[v + 1].y);
-		for (int h = 0; h < horizontalVec.size() - 1; h++)
-		{
-			int hMinX = std::min(horizontalVec[h].x, horizontalVec[h + 1].x);
-			int hMaxX = std::max(horizontalVec[h].x, horizontalVec[h + 1].x);
-			int hMinY = std::min(horizontalVec[h].y, horizontalVec[h + 1].y);
-			int hMaxY = std::max(horizontalVec[h].y, horizontalVec[h + 1].y);
-
-			if (hMaxX < vMaxX || hMinX > vMaxX || hMaxY < vMinY || hMinY > vMaxY)
-				continue;
-
-			float aV = (float)(verticalVec[v + 1].y - verticalVec[v].y) / (verticalVec[v + 1].x - verticalVec[v].x);
-			float bV = (float)verticalVec[v].y - aV * verticalVec[v].x;
-			float aH = (float)(horizontalVec[h + 1].y - horizontalVec[h].y) / (horizontalVec[h + 1].x - horizontalVec[h].x);
-			float bH = (float)horizontalVec[h].y - aH * horizontalVec[h].x;
-
-			float x = (bV - bH) / (aH - aV);
-			return cv::Point(x, aH * x + bH);
-		}
-	}
-
-	return cv::Point();
-}
-
-std::vector<std::vector<cv::Point>> GetVectorSetsIntersection(std::vector<std::vector<cv::Point>> horizontalSet, std::vector<std::vector<cv::Point>> verticalSet)
-{
-	ManualIntersector::PointVectorSet resultSet;
-	for (int h = 0; h < horizontalSet.size(); h++)
-	{
-		resultSet.push_back(std::vector<cv::Point>());
-		for (int v = 0; v < verticalSet.size(); v++)
-		{
-			cv::Point point = GetVectorSetsIntersection(horizontalSet[h], verticalSet[v]);
-			if (point.x == 0)
-				break;
-			resultSet[h].push_back(point);
-		}
-	}
-
-	return resultSet;
 }

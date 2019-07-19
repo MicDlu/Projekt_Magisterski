@@ -74,13 +74,14 @@ void ManualIntersector::UpdateZoomWindow(int x, int y)
 
 	// CREATE ZOOM IMAGE
 	cv::resize(imageDrawing(zoomRect), this->imageZoom, cv::Size(ZOOM_WINDOW_SIZE, ZOOM_WINDOW_SIZE));
+
 	// DRAW CROSS
 	cv::Point zoomPoint(ZOOM_WINDOW_SIZE / 2, ZOOM_WINDOW_SIZE / 2);
 	zoomPoint.x = (x - zoomRect.x) * ZOOM_FACTOR;
 	zoomPoint.y = (y - zoomRect.y) * ZOOM_FACTOR;
-
 	cv::line(this->imageZoom, cv::Point(zoomPoint.x, 0), cv::Point(zoomPoint.x, ZOOM_WINDOW_SIZE - 1), cv::Scalar(255, 0, 0));
 	cv::line(this->imageZoom, cv::Point(0, zoomPoint.y), cv::Point(ZOOM_WINDOW_SIZE - 1, zoomPoint.y), cv::Scalar(255, 0, 0));
+
 	cv::imshow("Lupa", this->imageZoom);
 	
 }
@@ -292,4 +293,54 @@ ManualIntersector::PointVectorSet ManualIntersector::GetScaledVectorSet(float sc
 		scaledVectorSet.push_back(scaledLine);
 	}
 	return scaledVectorSet;
+}
+
+std::vector<std::vector<cv::Point>> GetVectorSetsIntersection(std::vector<std::vector<cv::Point>> horizontalSet, std::vector<std::vector<cv::Point>> verticalSet)
+{
+	ManualIntersector::PointVectorSet resultSet;
+	for (int h = 0; h < horizontalSet.size(); h++)
+	{
+		resultSet.push_back(std::vector<cv::Point>());
+		for (int v = 0; v < verticalSet.size(); v++)
+		{
+			cv::Point point = GetVectorSetsIntersection(horizontalSet[h], verticalSet[v]);
+			if (point.x == 0)
+				break;
+			resultSet[h].push_back(point);
+		}
+	}
+
+	return resultSet;
+}
+
+
+cv::Point GetVectorSetsIntersection(std::vector<cv::Point> horizontalVec, std::vector<cv::Point> verticalVec)
+{
+	for (int v = 0; v < verticalVec.size() - 1; v++)
+	{
+		int vMinX = std::min(verticalVec[v].x, verticalVec[v + 1].x);
+		int vMaxX = std::max(verticalVec[v].x, verticalVec[v + 1].x);
+		int vMinY = std::min(verticalVec[v].y, verticalVec[v + 1].y);
+		int vMaxY = std::max(verticalVec[v].y, verticalVec[v + 1].y);
+		for (int h = 0; h < horizontalVec.size() - 1; h++)
+		{
+			int hMinX = std::min(horizontalVec[h].x, horizontalVec[h + 1].x);
+			int hMaxX = std::max(horizontalVec[h].x, horizontalVec[h + 1].x);
+			int hMinY = std::min(horizontalVec[h].y, horizontalVec[h + 1].y);
+			int hMaxY = std::max(horizontalVec[h].y, horizontalVec[h + 1].y);
+
+			if (hMaxX < vMaxX || hMinX > vMaxX || hMaxY < vMinY || hMinY > vMaxY)
+				continue;
+
+			float aV = (float)(verticalVec[v + 1].y - verticalVec[v].y) / (verticalVec[v + 1].x - verticalVec[v].x);
+			float bV = (float)verticalVec[v].y - aV * verticalVec[v].x;
+			float aH = (float)(horizontalVec[h + 1].y - horizontalVec[h].y) / (horizontalVec[h + 1].x - horizontalVec[h].x);
+			float bH = (float)horizontalVec[h].y - aH * horizontalVec[h].x;
+
+			float x = (bV - bH) / (aH - aV);
+			return cv::Point(x, aH * x + bH);
+		}
+	}
+
+	return cv::Point();
 }

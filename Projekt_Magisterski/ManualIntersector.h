@@ -4,6 +4,7 @@
 #include <atlstr.h>
 #include <locale>
 #include <codecvt>
+#include <math.h>
 
 #define IMAGE_SIZE_SVGA cv::Size(800,600)
 #define IMAGE_SIZE_PAL cv::Size(1024,576)
@@ -59,3 +60,6 @@ public:
 	PointVectorSet GetScaledVectorSet(float scale = 1);
 };
 
+std::vector<std::vector<cv::Point>> GetVectorSetsIntersection(std::vector<std::vector<cv::Point>> horizontalSet, std::vector<std::vector<cv::Point>> verticalSet);
+
+cv::Point GetVectorSetsIntersection(std::vector<cv::Point> horizontalSet, std::vector<cv::Point> verticalSet);
