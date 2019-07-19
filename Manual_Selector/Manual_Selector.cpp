@@ -52,12 +52,12 @@ int main()
 		std::cout << std::endl << "Wczytano plik: " << filePath << std::endl;
 
 		ManualIntersector intersectorH(filePath, windowSize);
-		intersectorH.RunSelector("poziomo");
+		intersectorH.RunSelector("poziomo",'H');
 		intersectorH.SaveFileDescription(descriptionPath,"_H");
 		std::cout << "Zapisano definicje poziomo: " << descriptionPath << std::endl;
 
 		ManualIntersector intersectorV(filePath, windowSize);
-		intersectorV.RunSelector("pionowo");
+		intersectorV.RunSelector("pionowo",'V');
 		intersectorV.SaveFileDescription(descriptionPath,"_V");
 		std::cout << "Zapisano definicje pionowa: " << descriptionPath << std::endl;
 

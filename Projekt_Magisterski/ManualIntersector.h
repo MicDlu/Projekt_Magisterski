@@ -27,6 +27,8 @@ private:
 	cv::Size2f sizeFactor;
 	PointVectorSet pointVectorSet;
 	cv::String windowName;
+	bool horizontal = false;
+	bool vertical = false;
 //Methods
 private:
 	void AddPoint(int x, int y);
@@ -36,16 +38,17 @@ private:
 	static void OnMouseEvent(int event, int x, int y, int flags, void* userdata);
 	void TranslateToOriginal(cv::Point &point);
 	void TranslateToProjection(cv::Point & point);
+	void CorrectVectorDirection(std::vector<cv::Point> &pointVector);
 public:
 	ManualIntersector(cv::String imagePath, cv::Size interfaceSize);
 	ManualIntersector(cv::String imagePath, cv::Size interfaceSize, PointVectorSet parsedVectorSet);
 	~ManualIntersector();
-	void RunSelector(std::string title);
+	void RunSelector(std::string title, char orientation);
 	PointVectorSet GetPointVectorSet();
 	cv::Mat GetLinearDrawing(bool highlightLast);
 	cv::Mat GetGridDrawing();
 	bool SaveFileDescription(std::string &filePathRef, std::string fileNameSuffix = "");
-	bool LoadImageDescription(std::string fileNameSuffix = "");
+	bool LoadImageDescription(std::string fileNameSuffix, char orientation);
 	std::string GetFilePathNoExtension();
 	PointVectorSet GetScaledVectorSet(float scale = 1);
 };

@@ -12,17 +12,27 @@ int main()
 	std::string jpgFilePath;
 	while (OpenJpgFile(jpgFilePath))
 	{
+		ManualIntersector intersectorH(jpgFilePath, IMAGE_SIZE_SVGA);
+		if (intersectorH.LoadImageDescription("_H",'H'))
+			cv::imshow("Siatka pozioma: " + jpgFilePath, intersectorH.GetLinearDrawing(false));
+
+		ManualIntersector intersectorV(jpgFilePath, IMAGE_SIZE_SVGA);
+		if (intersectorV.LoadImageDescription("_V",'V'))
+			cv::imshow("Siatka pionowa: " + jpgFilePath, intersectorV.GetLinearDrawing(false));
+
 		ManualIntersector intersectorX(jpgFilePath, IMAGE_SIZE);
-		if (!intersectorX.LoadImageDescription("_X"))
+		if (!intersectorX.LoadImageDescription("_X",'X'))
 			ParseHVtoX(jpgFilePath);
 
-		if (intersectorX.LoadImageDescription("_X"))
+		if (intersectorX.LoadImageDescription("_X",'X'))
 		{
-			ManualIntersector::PointVectorSet pointVectorSet = intersectorX.GetPointVectorSet();
-			cv::Mat scaledGridDrawing;
-			cv::resize(intersectorX.GetGridDrawing(), scaledGridDrawing, IMAGE_SIZE_SVGA);
-			cv::imshow("Obraz siatki: " + jpgFilePath, scaledGridDrawing);
+			cv::Mat scaledGridDrawingX;
+			cv::resize(intersectorX.GetGridDrawing(), scaledGridDrawingX, IMAGE_SIZE_SVGA);
+			cv::imshow("Siatka: " + jpgFilePath, scaledGridDrawingX);
+
 			cv::waitKey(1);
+			
+			ManualIntersector::PointVectorSet pointVectorSet = intersectorX.GetPointVectorSet();
 
 			// SRC GRID CALCULATIONS
 			cv::Size2f dstGridSize(25, 25);
@@ -92,6 +102,7 @@ int main()
 
 				cv::imwrite(intersectorX.GetFilePathNoExtension() + "_P.jpg", dst);
 				std::cout << "Zapisano przetworzony obraz: " << intersectorX.GetFilePathNoExtension() + "_P.jpg" << std::endl;
+				cv::destroyAllWindows();
 				system("pause");
 			}
 
@@ -109,12 +120,12 @@ int main()
 bool ParseHVtoX(std::string &jpgFilePath)
 {
 	ManualIntersector intersectorH(jpgFilePath, IMAGE_SIZE_SVGA);
-	if (intersectorH.LoadImageDescription("_H"))
+	if (intersectorH.LoadImageDescription("_H",'H'))
 	{
 		ManualIntersector::PointVectorSet pointVectorSetH = intersectorH.GetPointVectorSet();
 
 		ManualIntersector intersectorV(jpgFilePath, IMAGE_SIZE_SVGA);
-		if (intersectorV.LoadImageDescription("_V"))
+		if (intersectorV.LoadImageDescription("_V",'V'))
 		{
 			ManualIntersector::PointVectorSet pointVectorSetV = intersectorV.GetPointVectorSet();
 			ManualIntersector::PointVectorSet pointVectorSetX = GetVectorSetsIntersection(pointVectorSetH, pointVectorSetV);

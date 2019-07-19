@@ -25,7 +25,7 @@ ManualIntersector::~ManualIntersector()
 {
 }
 
-void ManualIntersector::RunSelector(std::string titlePrefix)
+void ManualIntersector::RunSelector(std::string titlePrefix, char orientation)
 {
 	this->windowName = titlePrefix + (titlePrefix.empty()?"":" - ") + this->imagePath;
 	cv::namedWindow(windowName, 1);
@@ -38,6 +38,23 @@ void ManualIntersector::RunSelector(std::string titlePrefix)
 	cv::destroyWindow(windowName);
 	if (pointVectorSet.back().size() == 0)
 		pointVectorSet.pop_back();
+	// SORTING
+	if (orientation == 'H')
+		this->horizontal = true;
+	if (orientation == 'V')
+		this->vertical = true;
+	for (int i = 0; i < pointVectorSet.size(); i++)
+	{
+		CorrectVectorDirection(pointVectorSet[i]);
+	}
+}
+
+void ManualIntersector::CorrectVectorDirection(std::vector<cv::Point> &pointVector)
+{
+	if (this->vertical && pointVector.front().y > pointVector.back().y)
+			std::reverse(pointVector.begin(), pointVector.end());
+	if (this->horizontal && pointVector.front().x > pointVector.back().x)
+		std::reverse(pointVector.begin(), pointVector.end());
 }
 
 ManualIntersector::PointVectorSet ManualIntersector::GetPointVectorSet()
@@ -152,8 +169,12 @@ bool ManualIntersector::SaveFileDescription(std::string &filePathRef, std::strin
 	return std::ifstream(this->imageDescrptionPath.c_str()).good();
 }
 
-bool ManualIntersector::LoadImageDescription(std::string fileNameSuffix)
+bool ManualIntersector::LoadImageDescription(std::string fileNameSuffix, char orientation)
 {
+	if (orientation == 'H')
+		this->horizontal = true;
+	if (orientation == 'V')
+		this->vertical = true;
 	std::string txtFilePath = GetFilePathNoExtension() + fileNameSuffix + ".txt";
 	std::ifstream imageDescriptionFile(txtFilePath);
 	if (imageDescriptionFile.is_open())
@@ -163,6 +184,8 @@ bool ManualIntersector::LoadImageDescription(std::string fileNameSuffix)
 		this->pointVectorSet.clear();
 		while (std::getline(imageDescriptionFile,line))
 		{
+			if (line == "")
+				continue;
 			std::stringstream lineStream(line);
 			cv::String element;
 			InitNewLine();
@@ -175,6 +198,7 @@ bool ManualIntersector::LoadImageDescription(std::string fileNameSuffix)
 				TranslateToProjection(point);
 				AddPoint(point);
 			}
+			CorrectVectorDirection(pointVectorSet.back());
 		}
 		return true;
 	}
