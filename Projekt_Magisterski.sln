@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Manual_Selector", "Manual_S
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Notebook_Dewarper", "Notebook_Dewarper\Notebook_Dewarper.vcxproj", "{000173F0-2BFE-48C0-AADC-107210751698}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Auto_Selector", "Auto_Selector\Auto_Selector.vcxproj", "{388D74DE-2D87-4086-964C-A1C677DF0900}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -41,6 +43,14 @@ Global
 		{000173F0-2BFE-48C0-AADC-107210751698}.Release|x64.Build.0 = Release|x64
 		{000173F0-2BFE-48C0-AADC-107210751698}.Release|x86.ActiveCfg = Release|Win32
 		{000173F0-2BFE-48C0-AADC-107210751698}.Release|x86.Build.0 = Release|Win32
+		{388D74DE-2D87-4086-964C-A1C677DF0900}.Debug|x64.ActiveCfg = Debug|x64
+		{388D74DE-2D87-4086-964C-A1C677DF0900}.Debug|x64.Build.0 = Debug|x64
+		{388D74DE-2D87-4086-964C-A1C677DF0900}.Debug|x86.ActiveCfg = Debug|Win32
+		{388D74DE-2D87-4086-964C-A1C677DF0900}.Debug|x86.Build.0 = Debug|Win32
+		{388D74DE-2D87-4086-964C-A1C677DF0900}.Release|x64.ActiveCfg = Release|x64
+		{388D74DE-2D87-4086-964C-A1C677DF0900}.Release|x64.Build.0 = Release|x64
+		{388D74DE-2D87-4086-964C-A1C677DF0900}.Release|x86.ActiveCfg = Release|Win32
+		{388D74DE-2D87-4086-964C-A1C677DF0900}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

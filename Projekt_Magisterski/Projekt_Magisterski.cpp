@@ -21,7 +21,7 @@ int main()
 			//intersector.SaveFileDescription();
 
 			//LOAD
-			intersector.LoadImageDescription("_H");
+			intersector.LoadImageDescription("_H",'H');
 			cv::imshow("loaded", intersector.GetLinearDrawing(false));
 			cv::waitKey(0);
 			continue;
