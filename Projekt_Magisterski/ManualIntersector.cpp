@@ -329,7 +329,7 @@ cv::Point GetVectorSetsIntersection(std::vector<cv::Point> horizontalVec, std::v
 			int hMaxY = std::max(horizontalVec[h].y, horizontalVec[h + 1].y);
 
 			// SKIP IF NOT INTERSECTING
-			if (hMaxX < vMaxX || hMinX > vMaxX || hMaxY < vMinY || hMinY > vMaxY)
+			if (hMaxX < vMinX || hMinX > vMaxX || hMaxY < vMinY || hMinY > vMaxY)
 				continue;
 
 			if (verticalVec[v + 1].x == verticalVec[v].x)
@@ -351,8 +351,7 @@ cv::Point GetVectorSetsIntersection(std::vector<cv::Point> horizontalVec, std::v
 				float x = (bV - bH) / (aH - aV);
 				float y = aH * x + bH;
 				return cv::Point(x, y);
-			}
-			
+			}			
 		}
 	}
 	return cv::Point();

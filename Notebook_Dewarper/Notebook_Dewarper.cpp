@@ -10,26 +10,30 @@ int main()
 	std::string jpgFilePath;
 	while (OpenJpgFile(jpgFilePath))
 	{
+		// HORIZONTAL LINES IMAGE
 		ManualIntersector intersectorH(jpgFilePath, IMAGE_SIZE_SVGA);
 		if (intersectorH.LoadImageDescription("_H",'H'))
 			cv::imshow("Siatka pozioma: " + jpgFilePath, intersectorH.GetLinearDrawing(false));
 
+		// VERTICAL LINES IMAGE
 		ManualIntersector intersectorV(jpgFilePath, IMAGE_SIZE_SVGA);
 		if (intersectorV.LoadImageDescription("_V",'V'))
 			cv::imshow("Siatka pionowa: " + jpgFilePath, intersectorV.GetLinearDrawing(false));
 
+		// CREATE GRID IF NOT EXIST
 		ManualIntersector intersectorX(jpgFilePath, IMAGE_SIZE);
 		if (!intersectorX.LoadImageDescription("_X",'X'))
 			ParseHVtoX(jpgFilePath);
 
-		if (intersectorX.LoadImageDescription("_X",'X'))
-		{
-			cv::Mat scaledGridDrawingX;
-			cv::resize(intersectorX.GetGridDrawing(), scaledGridDrawingX, IMAGE_SIZE_SVGA);
-			cv::imshow("Siatka: " + jpgFilePath, scaledGridDrawingX);
+		// GRID IMAGE
+		ManualIntersector intersectorXimg(jpgFilePath, IMAGE_SIZE_SVGA);
+		if (intersectorXimg.LoadImageDescription("_X", 'X'))
+			cv::imshow("Siatka: " + jpgFilePath, intersectorXimg.GetGridDrawing());
 
-			cv::waitKey(1);
-			
+		cv::waitKey(1);
+
+		if (intersectorX.LoadImageDescription("_X",'X'))
+		{						
 			ManualIntersector::PointVectorSet pointVectorSet = intersectorX.GetPointVectorSet();
 
 			// SRC GRID CALCULATIONS
@@ -130,7 +134,7 @@ bool ParseHVtoX(std::string &jpgFilePath)
 
 			ManualIntersector intersectorX(jpgFilePath, IMAGE_SIZE_SVGA, pointVectorSetX);
 			cv::Mat gridDrawing = intersectorX.GetGridDrawing();
-			cv::imshow("Drawing X", gridDrawing);
+			//cv::imshow("Utworzona siatka", gridDrawing);
 			std::string descriptionPath;
 			intersectorX.SaveFileDescription(descriptionPath, "_X");
 			std::cout << "Zapisano definicje polaczona: " << descriptionPath << std::endl;
