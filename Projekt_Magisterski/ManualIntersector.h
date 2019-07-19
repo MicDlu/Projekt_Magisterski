@@ -10,6 +10,9 @@
 #define IMAGE_SIZE_HD720 cv::Size(1280,720)
 #define IMAGE_SIZE_HD1080 cv::Size(1920,1080)
 #define IMAGE_SIZE IMAGE_SIZE_HD1080
+#define ZOOM_SIZE 40
+#define ZOOM_FACTOR 4
+#define ZOOM_WINDOW_SIZE ZOOM_SIZE * ZOOM_FACTOR
 
 bool OpenJpgFile(std::string &filePath);
 
@@ -29,6 +32,8 @@ private:
 	cv::String windowName;
 	bool horizontal = false;
 	bool vertical = false;
+	cv::Mat imageZoom;
+	cv::Mat imageDrawing;
 //Methods
 private:
 	void AddPoint(int x, int y);
@@ -39,6 +44,7 @@ private:
 	void TranslateToOriginal(cv::Point &point);
 	void TranslateToProjection(cv::Point & point);
 	void CorrectVectorDirection(std::vector<cv::Point> &pointVector);
+	void UpdateZoomWindow(int x, int y);
 public:
 	ManualIntersector(cv::String imagePath, cv::Size interfaceSize);
 	ManualIntersector(cv::String imagePath, cv::Size interfaceSize, PointVectorSet parsedVectorSet);

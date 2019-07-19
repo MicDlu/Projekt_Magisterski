@@ -9,6 +9,7 @@ ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSiz
 	this->sizeFactor.width = (float)this->inputImage.size().width / interfaceSize.width;
 	this->sizeFactor.height = (float)this->inputImage.size().height / interfaceSize.height;
 	this->pointVectorSet.clear();
+	this->imageDrawing = this->fixedImage;
 }
 
 ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSize, PointVectorSet parsedVectorSet)
@@ -19,6 +20,7 @@ ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSiz
 	this->sizeFactor.width = (float)this->inputImage.size().width / interfaceSize.width;
 	this->sizeFactor.height = (float)this->inputImage.size().height / interfaceSize.height;
 	this->pointVectorSet = parsedVectorSet;
+	this->imageDrawing = this->fixedImage;
 }
 
 ManualIntersector::~ManualIntersector()
@@ -57,6 +59,32 @@ void ManualIntersector::CorrectVectorDirection(std::vector<cv::Point> &pointVect
 		std::reverse(pointVector.begin(), pointVector.end());
 }
 
+void ManualIntersector::UpdateZoomWindow(int x, int y)
+{
+	// RECT LIMITED TO INPUT IMAGE
+	cv::Rect zoomRect(x - ZOOM_SIZE / 2, y - ZOOM_SIZE / 2, ZOOM_SIZE, ZOOM_SIZE);
+	if (zoomRect.x < 0)
+		zoomRect.x = 0;
+	if (zoomRect.x + zoomRect.width >= imageDrawing.cols)
+		zoomRect.x = imageDrawing.cols - zoomRect.width;
+	if (zoomRect.y < 0)
+		zoomRect.y = 0;
+	if (zoomRect.y + zoomRect.height >= imageDrawing.rows)
+		zoomRect.y = imageDrawing.rows - zoomRect.height;
+
+	// CREATE ZOOM IMAGE
+	cv::resize(imageDrawing(zoomRect), this->imageZoom, cv::Size(ZOOM_WINDOW_SIZE, ZOOM_WINDOW_SIZE));
+	// DRAW CROSS
+	cv::Point zoomPoint(ZOOM_WINDOW_SIZE / 2, ZOOM_WINDOW_SIZE / 2);
+	zoomPoint.x = (x - zoomRect.x) * ZOOM_FACTOR;
+	zoomPoint.y = (y - zoomRect.y) * ZOOM_FACTOR;
+
+	cv::line(this->imageZoom, cv::Point(zoomPoint.x, 0), cv::Point(zoomPoint.x, ZOOM_WINDOW_SIZE - 1), cv::Scalar(255, 0, 0));
+	cv::line(this->imageZoom, cv::Point(0, zoomPoint.y), cv::Point(ZOOM_WINDOW_SIZE - 1, zoomPoint.y), cv::Scalar(255, 0, 0));
+	cv::imshow("Lupa", this->imageZoom);
+	
+}
+
 ManualIntersector::PointVectorSet ManualIntersector::GetPointVectorSet()
 {
 	return pointVectorSet;
@@ -75,6 +103,9 @@ void ManualIntersector::OnMouseEvent(int event, int x, int y, int flags, void * 
 		break;
 	case cv::MouseEventTypes::EVENT_MBUTTONUP:
 		manualIntersector->InitNewLine();
+		break;
+	case cv::MouseEventTypes::EVENT_MOUSEMOVE:
+		manualIntersector->UpdateZoomWindow(x,y);
 		break;
 	default:
 		break;
@@ -124,6 +155,7 @@ cv::Mat ManualIntersector::GetLinearDrawing(bool highlightLast)
 			cv::circle(drawing, pointVectorSet[iL][iP], 0, color, 3);
 		}
 	}
+	this->imageDrawing = drawing;
 	return drawing;
 }
 
