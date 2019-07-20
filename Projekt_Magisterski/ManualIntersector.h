@@ -4,6 +4,8 @@
 #include <atlstr.h>
 #include <locale>
 #include <codecvt>
+#include <direct.h>
+#include <sys/stat.h>
 
 #define IMAGE_SIZE_SVGA cv::Size(800,600)
 #define IMAGE_SIZE_PAL cv::Size(1024,576)

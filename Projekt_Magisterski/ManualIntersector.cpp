@@ -4,25 +4,41 @@
 ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSize)
 {
 	this->imagePath = imagePath;
-	this->inputImage = cv::imread(imagePath);
-	system(("IF NOT EXIST " + GetFilePathNoExtension() + " (MKDIR " + GetFilePathNoExtension() + ")").c_str());
+	this->inputImage = cv::imread(imagePath);	
 	cv::resize(inputImage, this->fixedImage, interfaceSize);
 	this->sizeFactor.width = (float)this->inputImage.size().width / interfaceSize.width;
 	this->sizeFactor.height = (float)this->inputImage.size().height / interfaceSize.height;
 	this->pointVectorSet.clear();
 	this->imageDrawing = this->fixedImage;
+	// PREPARE DIRECTORY
+	_mkdir(GetFilePathNoExtension().c_str());
+	struct stat buffer;
+	if (stat(GetFilePathNoExtension().c_str(), &buffer))
+	{
+		std::cout << "Blad tworzenia folderu" << std::endl;
+		system("pause");
+		throw "Blad tworzenia folderu";
+	}		
 }
 
 ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSize, PointVectorSet parsedVectorSet)
 {
 	this->imagePath = imagePath;
 	this->inputImage = cv::imread(imagePath);
-	system(("IF NOT EXIST " + GetFilePathNoExtension() + " (MKDIR " + GetFilePathNoExtension() + ")").c_str());
 	cv::resize(inputImage, this->fixedImage, interfaceSize);
 	this->sizeFactor.width = (float)this->inputImage.size().width / interfaceSize.width;
 	this->sizeFactor.height = (float)this->inputImage.size().height / interfaceSize.height;
 	this->pointVectorSet = parsedVectorSet;
 	this->imageDrawing = this->fixedImage;
+	// PREPARE DIRECTORY
+	_mkdir(GetFilePathNoExtension().c_str());
+	struct stat buffer;
+	if (stat(GetFilePathNoExtension().c_str(), &buffer))
+	{
+		std::cout << "Blad tworzenia folderu" << std::endl;
+		system("pause");
+		throw "Blad tworzenia folderu";
+	}
 }
 
 ManualIntersector::~ManualIntersector()
