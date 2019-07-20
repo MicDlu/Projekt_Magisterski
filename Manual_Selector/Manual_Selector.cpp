@@ -64,40 +64,43 @@ int main()
 		intersectorH.RunSelector("poziomo",'H');
 		if (intersectorH.SaveFileDescription(descriptionPath, "_H"))
 		{
-			std::cout << "Zapisano definicje pozioma: " << descriptionPath << std::endl;
+			std::cout << "Zapisano definicje pozioma (H): " << intersectorH.GetDirFilePathNoExtension() + "_H.txt" << std::endl;
 			cv::imwrite(intersectorH.GetDirFilePathNoExtension() + "_H.jpg", intersectorH.GetLinearDrawing(false));
-			std::cout << "Zapisano obraz definicji poziomej: " << intersectorH.GetDirFilePathNoExtension() + "_H.jpg" << std::endl;
+			std::cout << "Zapisano obraz definicji poziomej (H): " << intersectorH.GetDirFilePathNoExtension() + "_H.jpg" << std::endl;
 		}
 		else
-			std::cout << "B³¹d zapisu: " << intersectorH.GetDirFilePathNoExtension() + "_H.txt" << std::endl;
+			std::cout << "B³¹d zapisu definicji poziomej (H): " << intersectorH.GetDirFilePathNoExtension() + "_H.txt" << std::endl;
+		std::cout << std::endl;
 
-			ManualIntersector intersectorV(filePath, windowSize);
-			intersectorV.RunSelector("pionowo",'V');
-			if (intersectorV.SaveFileDescription(descriptionPath,"_V"))
-			{
-				std::cout << "Zapisano definicje pionowa: " << descriptionPath << std::endl;
-				cv::imwrite(intersectorV.GetDirFilePathNoExtension() + "_V.jpg", intersectorV.GetLinearDrawing(false));
-				std::cout << "Zapisano obraz definicji pionowej: " << intersectorV.GetDirFilePathNoExtension() + "_V.jpg" << std::endl;
-			}
-			else
-				std::cout << "B³¹d zapisu: " << intersectorV.GetDirFilePathNoExtension() + "_V.txt" << std::endl;
-
-			ManualIntersector::PointVectorSet resultVectorSet = GetVectorSetsIntersection(intersectorH.GetPointVectorSet(), intersectorV.GetPointVectorSet());
-			ManualIntersector intersectorX(filePath, windowSize, resultVectorSet);
-			cv::Mat gridDrawing = intersectorX.GetGridDrawing();
-			cv::imshow("Siatka", gridDrawing);
-			if (intersectorX.SaveFileDescription(descriptionPath, "_X"))
-			{
-				std::cout << "Zapisano definicje siatki: " << descriptionPath << std::endl;
-				cv::imwrite(intersectorX.GetDirFilePathNoExtension() + "_X.jpg", gridDrawing);
-				std::cout << "Zapisano obraz siatki: " << intersectorX.GetDirFilePathNoExtension() + "_X.jpg" << std::endl;
-			}
-			else
-				std::cout << "B³¹d zapisu: " << intersectorX.GetDirFilePathNoExtension() + "_X.txt" << std::endl;
-
-			while (cv::waitKey(0) != 27);
-			cv::destroyAllWindows();
+		ManualIntersector intersectorV(filePath, windowSize);
+		intersectorV.RunSelector("pionowo",'V');
+		if (intersectorV.SaveFileDescription(descriptionPath,"_V"))
+		{
+			std::cout << "Zapisano definicje pionowa (V): " << intersectorH.GetDirFilePathNoExtension() + "_V.txt" << std::endl;
+			cv::imwrite(intersectorV.GetDirFilePathNoExtension() + "_V.jpg", intersectorV.GetLinearDrawing(false));
+			std::cout << "Zapisano obraz definicji pionowej (V): " << intersectorV.GetDirFilePathNoExtension() + "_V.jpg" << std::endl;
 		}
-		std::cout << std::endl << "Dzieki za pomoc <3" << std::endl;
-		system("pause");
+		else
+			std::cout << "B³¹d zapisu definicje pionowej (V): " << intersectorV.GetDirFilePathNoExtension() + "_V.txt" << std::endl;
+		std::cout << std::endl;
+
+		ManualIntersector::PointVectorSet resultVectorSet = GetVectorSetsIntersection(intersectorH.GetPointVectorSet(), intersectorV.GetPointVectorSet());
+		ManualIntersector intersectorX(filePath, windowSize, resultVectorSet);
+		cv::Mat gridDrawing = intersectorX.GetGridDrawing();
+		cv::imshow("Siatka", gridDrawing);
+		if (intersectorX.SaveFileDescription(descriptionPath, "_X"))
+		{
+			std::cout << "Zapisano definicje siatki (X): " << intersectorH.GetDirFilePathNoExtension() + "_X.txt" << std::endl;
+			cv::imwrite(intersectorX.GetDirFilePathNoExtension() + "_X.jpg", gridDrawing);
+			std::cout << "Zapisano obraz siatki (X): " << intersectorX.GetDirFilePathNoExtension() + "_X.jpg" << std::endl;
+		}
+		else
+			std::cout << "B³¹d zapisu siatki (X): " << intersectorX.GetDirFilePathNoExtension() + "_X.txt" << std::endl;
+		std::cout << std::endl;
+
+		while (cv::waitKey(0) != 27);
+		cv::destroyAllWindows();
 	}
+	std::cout << std::endl << "Dzieki za pomoc <3" << std::endl;
+	system("pause");
+}

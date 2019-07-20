@@ -48,7 +48,7 @@ ManualIntersector::~ManualIntersector()
 void ManualIntersector::RunSelector(std::string titlePrefix, char orientation)
 {
 	this->windowName = titlePrefix + (titlePrefix.empty()?"":" - ") + this->imagePath;
-	cv::namedWindow(windowName, 1);
+	cv::namedWindow(windowName, cv::WINDOW_NORMAL);
 	cv::imshow(windowName, this->fixedImage);
 	cv::waitKey(1);
 	cv::setMouseCallback(windowName,OnMouseEvent,this);

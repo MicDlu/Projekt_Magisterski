@@ -6,19 +6,18 @@
 
 int main()
 {
-
 	std::string jpgFilePath;
 	while (OpenJpgFile(jpgFilePath))
 	{
 		// HORIZONTAL LINES IMAGE
 		ManualIntersector intersectorH(jpgFilePath, IMAGE_SIZE_SVGA);
 		if (intersectorH.LoadImageDescription("_H",'H'))
-			cv::imshow("Siatka pozioma: " + jpgFilePath, intersectorH.GetLinearDrawing(false));
+			cv::imshow("Definicja pozioma (H): " + jpgFilePath, intersectorH.GetLinearDrawing(false));
 
 		// VERTICAL LINES IMAGE
 		ManualIntersector intersectorV(jpgFilePath, IMAGE_SIZE_SVGA);
 		if (intersectorV.LoadImageDescription("_V",'V'))
-			cv::imshow("Siatka pionowa: " + jpgFilePath, intersectorV.GetLinearDrawing(false));
+			cv::imshow("Definicja pionowa (V): " + jpgFilePath, intersectorV.GetLinearDrawing(false));
 
 		// CREATE GRID IF NOT EXIST
 		ManualIntersector intersectorX(jpgFilePath, IMAGE_SIZE);
@@ -28,16 +27,19 @@ int main()
 		// GRID IMAGE
 		ManualIntersector intersectorXimg(jpgFilePath, IMAGE_SIZE_SVGA);
 		if (intersectorXimg.LoadImageDescription("_X", 'X'))
-			cv::imshow("Siatka: " + jpgFilePath, intersectorXimg.GetGridDrawing());
+			cv::imshow("Siatka (X): " + jpgFilePath, intersectorXimg.GetGridDrawing());
 
 		cv::waitKey(1);
 
+		// LOAD DESCRIPTION
 		if (intersectorX.LoadImageDescription("_X",'X'))
 		{						
 			ManualIntersector::PointVectorSet pointVectorSet = intersectorX.GetPointVectorSet();
 
 			// SRC GRID CALCULATIONS
-			cv::Size2f dstGridSize(25, 25);
+			//cv::Size dstGridSize(25, 25);
+			//cv::Size dstGridCount(pointVectorSet.front().size() - 1, pointVectorSet.size() - 1);
+			cv::Size dstGridSize(25, 25);
 			int maxPointVectorWidth = pointVectorSet.front().size();
 			for (std::vector<cv::Point> pointVector : pointVectorSet)
 			{
@@ -69,7 +71,7 @@ int main()
 					}
 				}
 
-				// DST GRID SIZE
+				// DST GRID POSITION
 				std::vector<cv::Point2f> dstQuad;
 				dstQuad.push_back(cv::Point(0, 0));
 				dstQuad.push_back(cv::Point(dstGridSize.width, 0));
@@ -82,28 +84,33 @@ int main()
 				cv::resize(src, src, IMAGE_SIZE);
 				cv::Mat dst = cv::Mat::zeros(cv::Size(dstGridSize.width*dstGridCount.width + 1, dstGridSize.height*dstGridCount.height), src.type());
 
+				cv::namedWindow("Przetwarzanie... : " + jpgFilePath, cv::WINDOW_NORMAL);
+
 				for (int i = 0; i < srcQuads.size(); i++)
 				{
 					//std::cout << "Przetwarzanie " << i << " / " << srcQuads.size() << std::endl;
-					cv::Mat srcCopy = src;
+					//cv::Mat srcCopy = src;
 
-					// CALC GRID TRANSFORM
+					// CALC GRID TRANSFORMATION
+					cv::Mat H = cv::getPerspectiveTransform(srcQuads[i], dstQuad);
+
+					// PERFORM TRANSFORMATION
 					cv::Mat dstPart;
-					cv::Mat transform = cv::getPerspectiveTransform(srcQuads[i], dstQuad);
-					cv::warpPerspective(src, dstPart, transform, IMAGE_SIZE);
+					cv::warpPerspective(src, dstPart, H, IMAGE_SIZE);
 
 					// CROP GRID AREA					
 					dstPart(gridRect).copyTo(dst(dstRects[i]));
 
-					cv::imshow("part", dst);
+					// UPDATE VIEW
+					cv::imshow("Przetwarzanie...: " + jpgFilePath, dst);
 					cv::waitKey(1);
 				}
 
-				//cv::imshow("part", dst);
-				//cv::waitKey(0);
+				cv::imshow("Obraz przetworzony: " + jpgFilePath, dst);
+				cv::waitKey(0);
 
 				cv::imwrite(intersectorX.GetDirFilePathNoExtension() + "_P.jpg", dst);
-				std::cout << "Zapisano przetworzony obraz: " << intersectorX.GetDirFilePathNoExtension() + "_P.jpg" << std::endl;
+				std::cout << "Zapisano przetworzony obraz (P): " << intersectorX.GetDirFilePathNoExtension() + "_P.jpg" << std::endl;
 				cv::destroyAllWindows();
 				system("pause");
 			}
