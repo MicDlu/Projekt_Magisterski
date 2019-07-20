@@ -21,7 +21,7 @@ int main()
 	switch (key)
 	{
 	case '0':
-		std::cout << "Wybrano oryginalny rozmiar" << std::endl;
+		std::cout << "Wybrano oryginalny rozmiar" << std::endl << std::endl;
 		break;
 	case '1':
 		windowSize = IMAGE_SIZE_SVGA;
@@ -39,7 +39,7 @@ int main()
 		break;
 	}
 	if (key != 0)
-		std::cout << "Wybrano: " << windowSize.width << "/" << windowSize.height << std::endl;
+		std::cout << "Wybrano: " << windowSize.width << "/" << windowSize.height << std::endl << std::endl;
 
 	std::string filePath;
 	std::string descriptionPath;
@@ -62,22 +62,39 @@ int main()
 
 		ManualIntersector intersectorH(filePath, windowSize);
 		intersectorH.RunSelector("poziomo",'H');
-		intersectorH.SaveFileDescription(descriptionPath,"_H");
-		std::cout << "Zapisano definicje poziomo: " << descriptionPath << std::endl;
+		if (intersectorH.SaveFileDescription(descriptionPath, "_H"))
+		{
+			std::cout << "Zapisano definicje pozioma: " << descriptionPath << std::endl;
+			cv::imwrite(intersectorH.GetDirFilePathNoExtension() + "_H.jpg", intersectorH.GetLinearDrawing(false));
+			std::cout << "Zapisano obraz definicji poziomej: " << intersectorH.GetDirFilePathNoExtension() + "_H.jpg" << std::endl;
+		}
+		else
+			std::cout << "B³¹d zapisu: " << intersectorH.GetDirFilePathNoExtension() + "_H.txt" << std::endl;
 
 		ManualIntersector intersectorV(filePath, windowSize);
 		intersectorV.RunSelector("pionowo",'V');
-		intersectorV.SaveFileDescription(descriptionPath,"_V");
-		std::cout << "Zapisano definicje pionowa: " << descriptionPath << std::endl;
+		if (intersectorV.SaveFileDescription(descriptionPath,"_V"))
+		{
+			std::cout << "Zapisano definicje pionowa: " << descriptionPath << std::endl;
+			cv::imwrite(intersectorV.GetDirFilePathNoExtension() + "_V.jpg", intersectorV.GetLinearDrawing(false));
+			std::cout << "Zapisano obraz definicji pionowej: " << intersectorV.GetDirFilePathNoExtension() + "_V.jpg" << std::endl;
+		}
+		else
+			std::cout << "B³¹d zapisu: " << intersectorV.GetDirFilePathNoExtension() + "_V.txt" << std::endl;
 
 		ManualIntersector::PointVectorSet resultVectorSet = GetVectorSetsIntersection(intersectorH.GetPointVectorSet(), intersectorV.GetPointVectorSet());
 		ManualIntersector intersectorX(filePath, windowSize, resultVectorSet);
 		cv::Mat gridDrawing = intersectorX.GetGridDrawing();
-		cv::imshow("Drawing X", gridDrawing);
-		intersectorX.SaveFileDescription(descriptionPath, "_X");
-		std::cout << "Zapisano definicje polaczona: " << descriptionPath << std::endl;
-		cv::imwrite(intersectorX.GetFilePathNoExtension() + "_X.jpg",gridDrawing);
-		std::cout << "Zapisano obraz siatki: " << intersectorX.GetFilePathNoExtension() + "_X.jpg" << std::endl;
+		cv::imshow("Siatka", gridDrawing);
+		if (intersectorX.SaveFileDescription(descriptionPath, "_X"))
+		{
+			std::cout << "Zapisano definicje siatki: " << descriptionPath << std::endl;
+			cv::imwrite(intersectorX.GetDirFilePathNoExtension() + "_X.jpg", gridDrawing);
+			std::cout << "Zapisano obraz siatki: " << intersectorX.GetDirFilePathNoExtension() + "_X.jpg" << std::endl;
+		}
+		else
+			std::cout << "B³¹d zapisu: " << intersectorX.GetDirFilePathNoExtension() + "_X.txt" << std::endl;
+
 		while (cv::waitKey(0) != 27);
 		cv::destroyAllWindows();
 	}

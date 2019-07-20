@@ -5,6 +5,7 @@ ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSiz
 {
 	this->imagePath = imagePath;
 	this->inputImage = cv::imread(imagePath);
+	system(("IF NOT EXIST " + GetFilePathNoExtension() + " (MKDIR " + GetFilePathNoExtension() + ")").c_str());
 	cv::resize(inputImage, this->fixedImage, interfaceSize);
 	this->sizeFactor.width = (float)this->inputImage.size().width / interfaceSize.width;
 	this->sizeFactor.height = (float)this->inputImage.size().height / interfaceSize.height;
@@ -16,6 +17,7 @@ ManualIntersector::ManualIntersector(cv::String imagePath, cv::Size interfaceSiz
 {
 	this->imagePath = imagePath;
 	this->inputImage = cv::imread(imagePath);
+	system(("IF NOT EXIST " + GetFilePathNoExtension() + " (MKDIR " + GetFilePathNoExtension() + ")").c_str());
 	cv::resize(inputImage, this->fixedImage, interfaceSize);
 	this->sizeFactor.width = (float)this->inputImage.size().width / interfaceSize.width;
 	this->sizeFactor.height = (float)this->inputImage.size().height / interfaceSize.height;
@@ -38,17 +40,17 @@ void ManualIntersector::RunSelector(std::string titlePrefix, char orientation)
 	InitNewLine();
 	while (cv::waitKey(0) != 27);
 	cv::destroyWindow(windowName);
+	cv::destroyWindow("Lupa");
 	if (pointVectorSet.back().size() == 0)
 		pointVectorSet.pop_back();
+
 	// SORTING
 	if (orientation == 'H')
 		this->horizontal = true;
 	if (orientation == 'V')
 		this->vertical = true;
 	for (int i = 0; i < pointVectorSet.size(); i++)
-	{
 		CorrectVectorDirection(pointVectorSet[i]);
-	}
 }
 
 void ManualIntersector::CorrectVectorDirection(std::vector<cv::Point> &pointVector)
@@ -181,10 +183,10 @@ cv::Mat ManualIntersector::GetGridDrawing()
 
 bool ManualIntersector::SaveFileDescription(std::string &filePathRef, std::string fileNameSuffix)
 {
-	this->imageDescrptionPath = GetFilePathNoExtension() + fileNameSuffix + ".txt";
+	this->imageDescrptionPath = GetDirFilePathNoExtension() + fileNameSuffix + ".txt";
 	for (int i = 2; std::ifstream(this->imageDescrptionPath.c_str()).good(); i++)
 	{
-		this->imageDescrptionPath = GetFilePathNoExtension() + fileNameSuffix + "(" + std::to_string(i) + ").txt";
+		this->imageDescrptionPath = GetDirFilePathNoExtension() + fileNameSuffix + "(" + std::to_string(i) + ").txt";
 	}
 	filePathRef = this->imageDescrptionPath;
 	std::ofstream imageDescriptionFile;
@@ -208,7 +210,7 @@ bool ManualIntersector::LoadImageDescription(std::string fileNameSuffix, char or
 		this->horizontal = true;
 	if (orientation == 'V')
 		this->vertical = true;
-	std::string txtFilePath = GetFilePathNoExtension() + fileNameSuffix + ".txt";
+	std::string txtFilePath = GetDirFilePathNoExtension() + fileNameSuffix + ".txt";
 	std::ifstream imageDescriptionFile(txtFilePath);
 	if (imageDescriptionFile.is_open())
 	{
@@ -278,6 +280,17 @@ std::string ManualIntersector::GetFilePathNoExtension()
 {
 	int fileExtDotPos = imagePath.rfind('.');
 	return imagePath.substr(0, fileExtDotPos);
+}
+
+std::string ManualIntersector::GetFileName()
+{
+	int fileNamePos = GetFilePathNoExtension().rfind('\\');
+	return GetFilePathNoExtension().substr(fileNamePos + 1, GetFilePathNoExtension().size());
+}
+
+std::string ManualIntersector::GetDirFilePathNoExtension()
+{
+	return GetFilePathNoExtension() + "\\" + GetFileName();
 }
 
 ManualIntersector::PointVectorSet ManualIntersector::GetScaledVectorSet(float scale)

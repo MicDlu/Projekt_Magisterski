@@ -54,6 +54,8 @@ public:
 	bool SaveFileDescription(std::string &filePathRef, std::string fileNameSuffix = "");
 	bool LoadImageDescription(std::string fileNameSuffix, char orientation);
 	std::string GetFilePathNoExtension();
+	std::string GetFileName();
+	std::string GetDirFilePathNoExtension();
 	PointVectorSet GetScaledVectorSet(float scale = 1);
 };
 

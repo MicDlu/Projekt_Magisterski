@@ -102,8 +102,8 @@ int main()
 				//cv::imshow("part", dst);
 				//cv::waitKey(0);
 
-				cv::imwrite(intersectorX.GetFilePathNoExtension() + "_P.jpg", dst);
-				std::cout << "Zapisano przetworzony obraz: " << intersectorX.GetFilePathNoExtension() + "_P.jpg" << std::endl;
+				cv::imwrite(intersectorX.GetDirFilePathNoExtension() + "_P.jpg", dst);
+				std::cout << "Zapisano przetworzony obraz: " << intersectorX.GetDirFilePathNoExtension() + "_P.jpg" << std::endl;
 				cv::destroyAllWindows();
 				system("pause");
 			}
@@ -138,8 +138,8 @@ bool ParseHVtoX(std::string &jpgFilePath)
 			std::string descriptionPath;
 			intersectorX.SaveFileDescription(descriptionPath, "_X");
 			std::cout << "Zapisano definicje polaczona: " << descriptionPath << std::endl;
-			cv::imwrite(intersectorX.GetFilePathNoExtension() + "_X.jpg", gridDrawing);
-			std::cout << "Zapisano obraz siatki: " << intersectorX.GetFilePathNoExtension() + "_X.jpg" << std::endl;
+			cv::imwrite(intersectorX.GetDirFilePathNoExtension() + "_X.jpg", gridDrawing);
+			std::cout << "Zapisano obraz siatki: " << intersectorX.GetDirFilePathNoExtension() + "_X.jpg" << std::endl;
 			return true;
 		}
 	}
